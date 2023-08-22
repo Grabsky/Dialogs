@@ -29,8 +29,6 @@ dependencies {
     implementation("cloud.grabsky:bedrock:8d45e2d")
     implementation("cloud.grabsky:commands:a2eb7f9")
     implementation("cloud.grabsky:configuration-paper:0.9.7")
-    // Fancy NPCs
-    compileOnly("de.oliver:FancyNpcs:2.0.1")
 }
 
 tasks {

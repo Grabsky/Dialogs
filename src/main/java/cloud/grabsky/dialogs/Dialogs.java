@@ -9,9 +9,6 @@ import cloud.grabsky.configuration.paper.PaperConfigurationMapper;
 import cloud.grabsky.dialogs.command.DialogsCommand;
 import cloud.grabsky.dialogs.configuration.PluginDialogs;
 import cloud.grabsky.dialogs.configuration.PluginLocale;
-import de.oliver.fancynpcs.api.events.NpcStartLookingEvent;
-import de.oliver.fancynpcs.api.events.NpcStopLookingEvent;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import java.io.File;
@@ -73,16 +70,6 @@ public final class Dialogs extends BedrockPlugin implements Listener {
             e.printStackTrace();
             return false;
         }
-    }
-
-    @EventHandler
-    public void onNPCStartLookingEvent(final NpcStartLookingEvent event) {
-        System.out.println("NpcStartLookingEvent called... (NPC = " + event.getNpc().getData().getName() + ", PLAYER = " + event.getPlayer().getName() + ")");
-    }
-
-    @EventHandler
-    public void onNPCStopLookingEvent(final NpcStopLookingEvent event) {
-        System.out.println("NpcStopLookingEvent called... (NPC = " + event.getNpc().getData().getName() + ", PLAYER = " + event.getPlayer().getName() + ")");
     }
 
 }

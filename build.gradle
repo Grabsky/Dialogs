@@ -1,0 +1,54 @@
+plugins {
+    id("java-library")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+}
+
+final buildsDirectory = (System.getenv("JVM_BUILDS") ?: null)
+final pluginsDirectory = (System.getenv("PLUGINS_DIR") ?: null)
+
+group = "cloud.grabsky"
+version = "0.9.0-SNAPSHOT"
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "https://repo.grabsky.cloud/snapshots" }
+    maven { url = "https://papermc.io/repo/repository/maven-public/" }
+}
+
+dependencies {
+    // Lombok
+    compileOnly("org.projectlombok:lombok:1.18.26")
+    annotationProcessor("org.projectlombok:lombok:1.18.26")
+    // Paper
+    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
+    // Bedrock
+    implementation("cloud.grabsky:bedrock:8d45e2d")
+    implementation("cloud.grabsky:commands:a2eb7f9")
+    implementation("cloud.grabsky:configuration-paper:0.9.7")
+    // Fancy NPCs
+    compileOnly("de.oliver:FancyNpcs:2.0.1")
+}
+
+tasks {
+    shadowJar { archiveFileName = "${rootProject.name}-${project.version}.jar" }
+}
+
+tasks.register("deploy") {
+    dependsOn(shadowJar)
+    doLast {
+        // Copying to the builds directory specified by 'JVM_BUILDS' environment variable.
+        if (buildsDirectory != null)
+            copy { from(shadowJar) into(buildsDirectory) }
+        // Copying to the plugins directory specified by 'PLUGINS_DIR' environment variable.
+        if (pluginsDirectory != null)
+            copy { from(shadowJar) into(pluginsDirectory) }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.fork = true
+}

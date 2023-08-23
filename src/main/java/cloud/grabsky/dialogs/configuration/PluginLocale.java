@@ -38,4 +38,88 @@ public final class PluginLocale implements JsonConfiguration {
     @JsonPath("commands.dialogs_send_failure_not_found")
     public static String COMMAND_DIALOGS_SEND_FAILURE_NOT_FOUND;
 
+
+    public static final class Commands implements JsonConfiguration {
+
+        // Commands > General
+
+        @JsonPath("missing_permissions")
+        public static Component MISSING_PERMISSIONS;
+
+        // Commands > Executors
+
+        @JsonPath("invalid_executor_player")
+        public static Component INVALID_EXECUTOR_PLAYER;
+
+        @JsonPath("invalid_executor_console")
+        public static Component INVALID_EXECUTOR_CONSOLE;
+
+        // Commands > Arguments
+
+        @JsonPath("invalid_boolean")
+        public static String INVALID_BOOLEAN;
+
+        @JsonPath("invalid_short")
+        public static String INVALID_SHORT;
+
+        @JsonPath("invalid_short_not_in_range")
+        public static String INVALID_SHORT_NOT_IN_RANGE;
+
+        @JsonPath("invalid_integer")
+        public static String INVALID_INTEGER;
+
+        @JsonPath("invalid_integer_not_in_range")
+        public static String INVALID_INTEGER_NOT_IN_RANGE;
+
+        @JsonPath("invalid_long")
+        public static String INVALID_LONG;
+
+        @JsonPath("invalid_long_not_in_range")
+        public static String INVALID_LONG_NOT_IN_RANGE;
+
+        @JsonPath("invalid_float")
+        public static String INVALID_FLOAT;
+
+        @JsonPath("invalid_float_not_in_range")
+        public static String INVALID_FLOAT_NOT_IN_RANGE;
+
+        @JsonPath("invalid_double")
+        public static String INVALID_DOUBLE;
+
+        @JsonPath("invalid_double_not_in_range")
+        public static String INVALID_DOUBLE_NOT_IN_RANGE;
+
+        @JsonPath("invalid_uuid")
+        public static String INVALID_UUID;
+
+        @JsonPath("invalid_player")
+        public static String INVALID_PLAYER;
+
+        @JsonPath("invalid_offline_player")
+        public static String INVALID_OFFLINE_PLAYER;
+
+        @JsonPath("invalid_world")
+        public static String INVALID_WORLD;
+
+        @JsonPath("invalid_enchantment")
+        public static String INVALID_ENCHANTMENT;
+
+        @JsonPath("invalid_material")
+        public static String INVALID_MATERIAL;
+
+        @JsonPath("invalid_entity_type")
+        public static String INVALID_ENTITY_TYPE;
+
+        @JsonPath("invalid_namespacedkey")
+        public static String INVALID_NAMESPACEDKEY;
+
+        @JsonPath("invalid_position")
+        public static String INVALID_POSITION;
+
+        /* CUSTOM */
+
+
+
+    }
+
 }

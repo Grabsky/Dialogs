@@ -25,12 +25,14 @@ package cloud.grabsky.dialogs.configuration;
 
 import cloud.grabsky.configuration.JsonConfiguration;
 import cloud.grabsky.configuration.JsonPath;
+import cloud.grabsky.dialogs.Dialog;
 
+import java.util.List;
 import java.util.Map;
 
 public class PluginDialogs implements JsonConfiguration {
 
     @JsonPath("dialogs")
-    public static Map<String, String> DIALOGS;
+    public static Map<String, List<Dialog>> DIALOGS;
 
 }

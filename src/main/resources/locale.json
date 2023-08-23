@@ -1,11 +1,11 @@
 {
     "commands": {
-        "dialogs_usage:": [
+        "dialogs_usage": [
             "",
             "<dark_gray>›  <gold>/dialogs send <white>(player) (dialog_id) (duration_ticks)",
             ""
         ],
         "dialogs_send_usage": "<dark_gray>› <gray>Użycie: <gold>/dialogs send <white>(player) (dialog_id) (duration_ticks)",
-        "dialogs_send_failure_not_found": "<dark_gray>› <red>Dialog <gold><input><red> nie został odnaleziony,"
+        "dialogs_send_failure_not_found": "<dark_gray>› <red>Dialog <gold><input><red> nie został odnaleziony."
     }
 }

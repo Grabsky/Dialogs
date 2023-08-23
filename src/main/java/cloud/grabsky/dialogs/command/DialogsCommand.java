@@ -34,21 +34,22 @@ import cloud.grabsky.commands.component.CompletionsProvider;
 import cloud.grabsky.commands.component.ExceptionHandler;
 import cloud.grabsky.commands.exception.CommandLogicException;
 import cloud.grabsky.commands.exception.MissingInputException;
+import cloud.grabsky.dialogs.Dialog;
 import cloud.grabsky.dialogs.Dialogs;
 import cloud.grabsky.dialogs.configuration.PluginDialogs;
 import cloud.grabsky.dialogs.configuration.PluginLocale;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -74,7 +75,7 @@ public final class DialogsCommand extends RootCommand {
         final RootCommandInput input = context.getInput();
         // Returning list of sub-commands when no argument was specified in the input.
         if (index == 0) return CompletionsProvider.of(
-                Stream.of("send")
+                Stream.of("reload", "send")
                         .filter(literal -> sender.hasPermission(this.getPermission() + "." + literal) == true)
                         .toList()
         );
@@ -88,12 +89,26 @@ public final class DialogsCommand extends RootCommand {
             case "send" -> switch (index) {
                 case 1 -> CompletionsProvider.of(Player.class);
                 case 2 -> CompletionsProvider.of(PluginDialogs.DIALOGS.keySet());
-                case 3 -> CompletionsProvider.of("40");
                 default -> CompletionsProvider.EMPTY;
             };
             // ...
             default -> CompletionsProvider.EMPTY;
         };
+    }
+
+    public void onDialogsReload(final @NotNull RootCommandContext context, final @NotNull ArgumentQueue arguments) {
+        final CommandSender sender = context.getExecutor().asCommandSender();
+        // Checking permissions.
+        if (sender.hasPermission(this.getPermission() + ".reload") == true) {
+            // ...
+            return;
+        }
+        // Sending error message.
+        Message.of(PluginLocale.Commands.MISSING_PERMISSIONS).send(sender);
+    }
+
+    public void onDialogsSend(final @NotNull RootCommandContext context, final @NotNull ArgumentQueue arguments) {
+
     }
 
     @Override
@@ -108,60 +123,50 @@ public final class DialogsCommand extends RootCommand {
         final String argument = arguments.next(String.class).asRequired().toLowerCase();
         // ...
         switch (argument) {
+            case "reload" -> {
+                plugin.reloadConfiguration();
+            }
             case "send" -> {
                 final Player target = arguments.next(Player.class).asRequired(DIALOGS_SEND_USAGE);
                 final String dialogIdentifier = arguments.next(String.class).asRequired(DIALOGS_SEND_USAGE);
-                final int durationTicks = arguments.next(Integer.class).asRequired(DIALOGS_SEND_USAGE);
                 // ...
-                final @Nullable String dialog = PluginDialogs.DIALOGS.get(dialogIdentifier);
+                final @Nullable List<Dialog> dialogs = PluginDialogs.DIALOGS.get(dialogIdentifier);
                 // Sending error message in case dialog with specified identifier was not found.
-                if (dialog == null) {
+                if (dialogs == null || dialogs.isEmpty() == true) {
                     Message.of(PluginLocale.COMMAND_DIALOGS_SEND_FAILURE_NOT_FOUND).placeholder("input", dialogIdentifier).send(sender);
                     return;
                 }
-                // Creating an ArrayList to store the dialog parts in.
-                final List<String> result = new ArrayList<>();
-                // Creating a Matcher from pattern to select all MiniMessage tags.
-                final Matcher matcher =  TAG_PATTERN.matcher(dialog);
-                // Iterating over splitted dialog, with all MiniMessage tags removed.
-                // This should create something like that ["<_TAG_>H", "e", "l", "l", "o", " ", "<red>W", "o, ...]
-                TAG_PATTERN.splitAsStream(dialog).forEach(str -> {
-                    // Adding each character of a dialog split to the result list.
-                    for (final char c : str.toCharArray()) {
-                        result.add(c + "");
-                    }
-                    // Adding each MiniMessage tag to the result list.
-                    if (matcher.find() == true)
-                        result.add(matcher.group());
-                });
-                // Creating a Random with array size as a seed. That way "type animation" will not be randomized for the same dialog called multiple times.
-                final Random random = new Random(result.size());
+                final Iterator<Dialog> dialogsIterator = dialogs.iterator();
+                final Dialog initialDialog = dialogsIterator.next();
                 // Getting the iterator for the result.
-                final Iterator<String> iterator = result.iterator();
-                // ...
-                final StringBuilder builder = new StringBuilder();
+                final AtomicReference<Iterator<Component>> atomicFramesIterator = new AtomicReference<>(initialDialog.getFrames().iterator());
                 // Calculating extended iterations count, this is (duration_ticks) / (task_repeat_period).
-                final AtomicInteger extendedIterationsCount = new AtomicInteger(durationTicks / 2);
+                final AtomicReference<Dialog> atomicDialog = new AtomicReference<>(initialDialog);
+                final AtomicInteger pauseDuration = new AtomicInteger(initialDialog.getPause() / 2);
                 // Scheduling a new repeat task to run every 2 ticks until result list is fully consumed.
-                plugin.getBedrockScheduler().repeat(0L, 2L, result.size(), (task) -> {
+                plugin.getBedrockScheduler().repeatAsync(0L, 2L, Short.MAX_VALUE, (task) -> {
                     // In case iterator has reached the end, action bar is now sent for n more iterations. Unfortunately there is no way to specify it's duration. (protocol does not support that)
-                    if (iterator.hasNext() == false) {
+                    if (atomicFramesIterator.get().hasNext() == false) {
                         // Extending duration of action bar being shown to the player.
-                        if (extendedIterationsCount.addAndGet(-1) > 0) {
-                            Message.of(builder.toString()).placeholder("player", target).sendActionBar(target);
+                        if (pauseDuration.addAndGet(-1) > 0) {
+                            Message.of(atomicDialog.get().getLastFrame()).sendActionBar(target);
+                            return true;
+                        }
+                        if (dialogsIterator.hasNext() == true) {
+                            atomicDialog.set(dialogsIterator.next());
+                            pauseDuration.set(atomicDialog.get().getPause() / 2);
+                            atomicFramesIterator.set(atomicDialog.get().getFrames().iterator());
                             return true;
                         }
                         // Cancelling the task when extended iteration count has finished.
                         return false;
                     }
                     // ...
-                    for (int i = 0; i < random.nextInt(2, 4); i++) {
-                        final String next = iterator.next();
-                        // ...
-                        builder.append(next);
-                        // ...
-                        Message.of(builder.toString()).placeholder("player",target).sendActionBar(target);
-                    }
+                    final Component next = atomicFramesIterator.get().next();
+                    // ...
+                    Message.of(next).sendActionBar(target);
+                    target.playSound(target, Sound.BLOCK_NOTE_BLOCK_HAT, 1.0F, 0.1F);
+                    // ...
                     return true;
                 });
             }

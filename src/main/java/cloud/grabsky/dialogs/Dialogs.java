@@ -32,6 +32,7 @@ import cloud.grabsky.configuration.paper.PaperConfigurationMapper;
 import cloud.grabsky.dialogs.command.DialogsCommand;
 import cloud.grabsky.dialogs.configuration.PluginDialogs;
 import cloud.grabsky.dialogs.configuration.PluginLocale;
+import cloud.grabsky.dialogs.configuration.adapter.DialogAdapter;
 import org.bukkit.event.Listener;
 
 import java.io.File;
@@ -55,7 +56,7 @@ public final class Dialogs extends BedrockPlugin implements Listener {
         // ...
         instance = this;
         // ...
-        this.mapper = PaperConfigurationMapper.create();
+        this.mapper = PaperConfigurationMapper.create(moshi -> moshi.add(Dialog.class, DialogAdapter.INSTANCE));
         // ...
         if (this.reloadConfiguration() == false)
             this.getServer().shutdown();
@@ -80,12 +81,14 @@ public final class Dialogs extends BedrockPlugin implements Listener {
     @Override
     public boolean onReload() throws ConfigurationMappingException, IllegalStateException {
         try {
-            final File dialogs = ensureResourceExistence(this, new File(this.getDataFolder(), "dialogs.json"));
             final File locale = ensureResourceExistence(this, new File(this.getDataFolder(), "locale.json"));
+            final File localeCommands = ensureResourceExistence(this, new File(this.getDataFolder(), "locale_commands.json"));
+            final File dialogs = ensureResourceExistence(this, new File(this.getDataFolder(), "dialogs.json"));
             // Reloading configuration files.
             mapper.map(
-                    ConfigurationHolder.of(PluginDialogs.class, dialogs),
-                    ConfigurationHolder.of(PluginLocale.class, locale)
+                    ConfigurationHolder.of(PluginLocale.class, locale),
+                    ConfigurationHolder.of(PluginLocale.Commands.class, localeCommands),
+                    ConfigurationHolder.of(PluginDialogs.class, dialogs)
             );
             // Returning 'true' as reload finished without any exceptions.
             return true;

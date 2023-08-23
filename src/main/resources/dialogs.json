@@ -1,5 +1,7 @@
 {
     "dialogs": {
-        "npc_allay_lodestone": "<aqua>Allay<dark_gray>: <white>Witaj <yellow><player><white>, podejdź bliżej jeżeli potrzebujesz pomocy."
+        "npc_allay_lodestone": [
+            { "text": "<aqua>Allay<dark_gray>: <white>Witaj <yellow><player><white>, podejdź bliżej jeżeli potrzebujesz pomocy.", "pause": 40 }
+        ]
     }
 }

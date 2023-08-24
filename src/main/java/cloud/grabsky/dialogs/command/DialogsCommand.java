@@ -38,18 +38,12 @@ import cloud.grabsky.dialogs.Dialog;
 import cloud.grabsky.dialogs.Dialogs;
 import cloud.grabsky.dialogs.configuration.PluginDialogs;
 import cloud.grabsky.dialogs.configuration.PluginLocale;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -96,20 +90,6 @@ public final class DialogsCommand extends RootCommand {
         };
     }
 
-    public void onDialogsReload(final @NotNull RootCommandContext context, final @NotNull ArgumentQueue arguments) {
-        final CommandSender sender = context.getExecutor().asCommandSender();
-        // Checking permissions.
-        if (sender.hasPermission(this.getPermission() + ".reload") == true) {
-            // ...
-            return;
-        }
-        // Sending error message.
-        Message.of(PluginLocale.Commands.MISSING_PERMISSIONS).send(sender);
-    }
-
-    public void onDialogsSend(final @NotNull RootCommandContext context, final @NotNull ArgumentQueue arguments) {
-
-    }
 
     @Override
     public void onCommand(final @NotNull RootCommandContext context, final @NotNull ArgumentQueue arguments) throws CommandLogicException {
@@ -130,45 +110,14 @@ public final class DialogsCommand extends RootCommand {
                 final Player target = arguments.next(Player.class).asRequired(DIALOGS_SEND_USAGE);
                 final String dialogIdentifier = arguments.next(String.class).asRequired(DIALOGS_SEND_USAGE);
                 // ...
-                final @Nullable List<Dialog> dialogs = PluginDialogs.DIALOGS.get(dialogIdentifier);
+                final @Nullable Dialog dialog = PluginDialogs.DIALOGS.get(dialogIdentifier);
                 // Sending error message in case dialog with specified identifier was not found.
-                if (dialogs == null || dialogs.isEmpty() == true) {
+                if (dialog == null || dialog.isEmpty() == true) {
                     Message.of(PluginLocale.COMMAND_DIALOGS_SEND_FAILURE_NOT_FOUND).placeholder("input", dialogIdentifier).send(sender);
                     return;
                 }
-                final Iterator<Dialog> dialogsIterator = dialogs.iterator();
-                final Dialog initialDialog = dialogsIterator.next();
-                // Getting the iterator for the result.
-                final AtomicReference<Iterator<Component>> atomicFramesIterator = new AtomicReference<>(initialDialog.getFrames().iterator());
-                // Calculating extended iterations count, this is (duration_ticks) / (task_repeat_period).
-                final AtomicReference<Dialog> atomicDialog = new AtomicReference<>(initialDialog);
-                final AtomicInteger pauseDuration = new AtomicInteger(initialDialog.getPause() / 2);
-                // Scheduling a new repeat task to run every 2 ticks until result list is fully consumed.
-                plugin.getBedrockScheduler().repeatAsync(0L, 2L, Short.MAX_VALUE, (task) -> {
-                    // In case iterator has reached the end, action bar is now sent for n more iterations. Unfortunately there is no way to specify it's duration. (protocol does not support that)
-                    if (atomicFramesIterator.get().hasNext() == false) {
-                        // Extending duration of action bar being shown to the player.
-                        if (pauseDuration.addAndGet(-1) > 0) {
-                            Message.of(atomicDialog.get().getLastFrame()).sendActionBar(target);
-                            return true;
-                        }
-                        if (dialogsIterator.hasNext() == true) {
-                            atomicDialog.set(dialogsIterator.next());
-                            pauseDuration.set(atomicDialog.get().getPause() / 2);
-                            atomicFramesIterator.set(atomicDialog.get().getFrames().iterator());
-                            return true;
-                        }
-                        // Cancelling the task when extended iteration count has finished.
-                        return false;
-                    }
-                    // ...
-                    final Component next = atomicFramesIterator.get().next();
-                    // ...
-                    Message.of(next).sendActionBar(target);
-                    target.playSound(target, Sound.BLOCK_NOTE_BLOCK_HAT, 1.0F, 0.1F);
-                    // ...
-                    return true;
-                });
+                // Triggering Dialog on specified target.
+                dialog.trigger(target);
             }
         }
     }

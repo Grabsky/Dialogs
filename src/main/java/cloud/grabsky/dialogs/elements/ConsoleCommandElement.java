@@ -21,17 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package cloud.grabsky.dialogs.configuration;
+package cloud.grabsky.dialogs.elements;
 
-import cloud.grabsky.configuration.JsonConfiguration;
-import cloud.grabsky.configuration.JsonPath;
-import cloud.grabsky.dialogs.Dialog;
+import cloud.grabsky.dialogs.DialogElement;
 
-import java.util.Map;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
-public class PluginDialogs implements JsonConfiguration {
+@Accessors(fluent = true)
+@RequiredArgsConstructor(access = AccessLevel.PUBLIC)
+public class ConsoleCommandElement implements DialogElement {
 
-    @JsonPath("dialogs")
-    public static Map<String, Dialog> DIALOGS;
+    @Getter(AccessLevel.PUBLIC)
+    private final String value;
+
+    @Getter(AccessLevel.PUBLIC)
+    private final int ticksToWait;
 
 }

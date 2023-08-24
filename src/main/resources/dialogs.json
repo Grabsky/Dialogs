@@ -1,7 +1,30 @@
 {
     "dialogs": {
-        "npc_allay_lodestone": [
-            { "text": "<aqua>Allay<dark_gray>: <white>Witaj <yellow><player><white>, podejdź bliżej jeżeli potrzebujesz pomocy.", "pause": 40 }
-        ]
+        "npc_allay_lodestone": {
+            "elements": [
+                {
+                    "type": "animated_text/actionbar",
+                    "value": "<aqua>Allay<dark_gray>: <white>Witaj... podejdź bliżej jeżeli potrzebujesz pomocy.",
+                    "lock_on_last_frame": true,
+                    "ticks_to_wait_before_continuing": 100
+                },
+                {
+                    "type": "console_command",
+                    "value": "give <player> minecraft:diamond 1",
+                    "ticks_to_wait_before_continuing": 100
+                },
+                {
+                    "type": "animated_text/actionbar",
+                    "value": "<aqua>Allay<dark_gray>: <white>Witaj... ponownie?",
+                    "lock_on_last_frame": false,
+                    "ticks_to_wait_before_continuing": 200
+                },
+                {
+                    "type": "text/actionbar",
+                    "value": "<#4e5c24>炙",
+                    "ticks_to_wait_before_continuing": 100
+                }
+            ]
+        }
     }
 }

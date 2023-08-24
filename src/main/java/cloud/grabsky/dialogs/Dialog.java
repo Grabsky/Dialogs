@@ -1,83 +1,125 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 Grabsky <44530932+Grabsky@users.noreply.github.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * HORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package cloud.grabsky.dialogs;
 
+import cloud.grabsky.bedrock.components.Message;
+import cloud.grabsky.dialogs.elements.AnimatedTextElement;
+import cloud.grabsky.dialogs.elements.ConsoleCommandElement;
+import cloud.grabsky.dialogs.elements.TextElement;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.regex.Pattern;
+import java.util.function.Predicate;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
 
-public final class Dialog {
+@RequiredArgsConstructor(access = AccessLevel.PUBLIC)
+public final class Dialog implements Collection<DialogElement> {
 
-    private static final Pattern TAG_PATTERN = Pattern.compile("(?=<)|(?<=>)"); // Pattern.compile("<[^>]*>");
+    private static final Dialogs plugin = Dialogs.getInstance();
 
-    public Dialog(final String text, final int pause) {
-        this.text = text;
-        this.pause = pause;
+    @Delegate @Getter(AccessLevel.PUBLIC)
+    private final Collection<DialogElement> elements;
+
+    // TO-DO: Fix last element having their #ticksToWait ignored. It's happening because combinedDuration is increased AFTER the last task has been started.
+    public void trigger(final @NotNull Player target) {
+        int combinedDuration = 0;
         // ...
-        final ArrayList<Component> frames = new ArrayList<>();
-        // ...
-        final Random random = new Random();
-        // Iterating over splitted dialog, with all MiniMessage tags removed.
-        final Iterator<String> iterator = TAG_PATTERN.splitAsStream(text).map(String::new).iterator();
-        // ...
-        final StringBuilder builder = new StringBuilder();
-        // ...
-        while (iterator.hasNext() == true) {
-            // ...
-            final String currentPart = iterator.next();
-            // ...
-            if (MiniMessage.miniMessage().stripTags(currentPart).isEmpty() == true) {
-                frames.add(MiniMessage.miniMessage().deserialize(builder + currentPart).compact());
+        for (final DialogElement element : elements) {
+            plugin.getBedrockScheduler().repeatAsync(combinedDuration, 2L, element.ticksToWait() / 2, createPredicate(target, element));
+            combinedDuration += element.ticksToWait();
+        }
+    }
+
+    private @NotNull Predicate<Integer> createPredicate(final Player target, final DialogElement element) throws UnsupportedOperationException {
+        if (element instanceof TextElement textElement) {
+            return (iteration) -> {
+                // Cancelling when target happen to be offline.
+                if (target == null || target.isOnline() == false)
+                    return false;
+                // Getting the message channel.
+                final TextElement.Channel channel = textElement.channel();
+                // Preparing the message.
+                final Message.StringMessage message = Message.of(textElement.value());
+                // Sending message based on channel type.
+                switch (channel) {
+                    case CHAT_MESSAGE -> message.send(target);
+                    case CHAT_BROADCAST -> message.broadcast();
+                    case ACTIONBAR -> message.sendActionBar(target);
+                }
+                // Exiting...
+                return false;
+            };
+        } else if (element instanceof AnimatedTextElement animatedText) {
+            final AnimatedTextElement.Channel channel = animatedText.channel();
+            final Iterator<Component> frames = animatedText.frames().iterator();
+            // Returning...
+            return (iteration) -> {
+                // Cancelling when target happen to be offline.
+                if (target == null || target.isOnline() == false)
+                    return false;
                 // ...
-                builder.append(currentPart);
+                final Component component = (frames.hasNext() == true)
+                        ? frames.next()
+                        : (animatedText.isLockOnLastFrame() == true)
+                                ? animatedText.lastFrame()
+                                : null;
                 // ...
-                continue;
-            }
-            // Normal text...
-            int num = random.nextInt(2, 3);
-            // ...
-            int charsProcessed = 0;
-            // ...
-            while (charsProcessed < currentPart.length()) {
-                final String currentPartRandomized = currentPart.substring(charsProcessed, Math.min(currentPart.length(), charsProcessed + num));
+                switch (channel) {
+                    case ACTIONBAR -> Message.of(component).sendActionBar(target);
+                }
+                if (frames.hasNext() == true)
+                    target.playSound(target, Sound.BLOCK_NOTE_BLOCK_HAT, 1.0F, 0.1F);
+                // Continuing... Should be cancelled automatically when max iterations is reached.
+                return true;
+            };
+        } else if (element instanceof ConsoleCommandElement consoleCommand) {
+            // Returning...
+            return (iteration) -> {
+                // Cancelling when target happen to be offline.
+                if (target == null || target.isOnline() == false)
+                    return false;
                 // ...
-                frames.add(MiniMessage.miniMessage().deserialize(builder + currentPartRandomized).compact());
-                // ...
-                builder.append(currentPartRandomized);
-                charsProcessed += num;
-            }
+                plugin.getBedrockScheduler().run(1L, (___) -> {
+                    // Preparing command string.
+                    final String command = consoleCommand.value().replace("<player>", target.getName());
+                    // Scheduling command execution to the main thread.
+                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command);
+                });
+                // Exiting...
+                return false;
+            };
         }
         // ...
-        this.frames = frames;
-    }
-
-    /**
-     * Dialog {@link String} encoded using {@link MiniMessage} serializer.
-     */
-    @Getter(AccessLevel.PUBLIC)
-    private final String text;
-
-    /**
-     * Pause to wait after displaying this {@link Dialog}. Measured in {@code ticks}.
-     */
-    @Getter(AccessLevel.PUBLIC)
-    private final int pause;
-
-    @Getter(AccessLevel.PUBLIC)
-    private transient final List<Component> frames;
-
-    public Component getFirstFrame() {
-        return frames.get(0);
-    }
-
-    public Component getLastFrame() {
-        return frames.get(frames.size() - 1);
+        throw new UnsupportedOperationException("UNSUPPORTED_ELEMENT_TYPE");
     }
 
 }

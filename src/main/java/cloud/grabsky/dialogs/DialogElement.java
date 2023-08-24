@@ -21,17 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package cloud.grabsky.dialogs.configuration;
+package cloud.grabsky.dialogs;
 
-import cloud.grabsky.configuration.JsonConfiguration;
-import cloud.grabsky.configuration.JsonPath;
-import cloud.grabsky.dialogs.Dialog;
+public interface DialogElement {
 
-import java.util.Map;
-
-public class PluginDialogs implements JsonConfiguration {
-
-    @JsonPath("dialogs")
-    public static Map<String, Dialog> DIALOGS;
+    int ticksToWait();
 
 }

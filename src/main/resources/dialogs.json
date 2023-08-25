@@ -1,29 +1,39 @@
 {
     "dialogs": {
-        "npc_allay_lodestone": {
+        "welcome_dialog": {
             "elements": [
                 {
+                    // Supported types are: [animated_text/actionbar]
                     "type": "animated_text/actionbar",
-                    "value": "<aqua>Allay<dark_gray>: <white>Witaj... podejdź bliżej jeżeli potrzebujesz pomocy.",
+                    // Text to be displayed. Frames are generated automatically.
+                    "value": "<gold>Somebody<dark_gray>: <white>Welcome to the city, stranger...",
+                    // Optional refresh rate measured in ticks. (DEFAULT = 2)
+                    "refresh_rate": 1,
+                    // Optional minimum number of letter animated per frame. (DEFAULT = 2)
+                    "min_letters_per_frame": 1,
+                    // Optional maximum number of letter animated per frame. (DEFAULT = 3)
+                    "max_letters_per_frame": 1,
+                    // Optional toggle whether last frame should persist until the next element. (DEFAULT = true)
+                    "lock_until_next_element": true,
+                    // Ticks to wait before continuing to the next element in the queue.
+                    "ticks_to_wait_before_continuing": 80
+                },
+                {
+                    "type": "animated_text/actionbar",
+                    "value": "<gold>Somebody<dark_gray>: <white>Here, take this... You may find that useful.",
                     "lock_until_next_element": false,
-                    "ticks_to_wait_before_continuing": 40
+                    "ticks_to_wait_before_continuing": 100
                 },
                 {
                     "type": "console_command",
-                    "value": "give <player> minecraft:diamond 1",
-                    "ticks_to_wait_before_continuing": 40
+                    "value": "give %player_name% minecraft:iron_sword 1 --silent",
+                    "ticks_to_wait_before_continuing": 0
                 },
                 {
-                    "type": "animated_text/actionbar",
-                    "value": "<aqua>Allay<dark_gray>: <white>Witaj... ponownie?",
-                    "lock_until_next_element": true,
-                    "ticks_to_wait_before_continuing": 40
-                },
-                {
-                    "type": "text/actionbar",
-                    "value": "<#4e5c24>炙",
-                    "lock_until_next_element": true,
-                    "ticks_to_wait_before_continuing": 400
+                    "type": "text/chat_message",
+                    "value": "<gray><italic>You received an <white>Iron Sword<gray> from a stranger.",
+                    "lock_until_next_element": false,
+                    "ticks_to_wait_before_continuing": 0
                 }
             ]
         }

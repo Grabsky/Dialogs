@@ -23,9 +23,12 @@
  */
 package cloud.grabsky.dialogs.elements;
 
+import cloud.grabsky.configuration.util.LazyInit;
 import cloud.grabsky.dialogs.DialogElement;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -81,6 +84,37 @@ public final class TextElement implements DialogElement {
             throw new IllegalArgumentException(identifier);
         }
 
+    }
+
+
+    @ApiStatus.Internal
+    // NOTE: Field names does not follow Java Naming Convention to provide 1:1 mapping with JSON keys.
+    @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
+    public static final class Init implements LazyInit<TextElement> {
+
+        // Not an actual JSON field, filled by JsonAdapter based on context.
+        private final @NotNull TextElement.Channel channel;
+
+        // Nullability cannot be determined because it depends entirely on the end-user.
+        public @UnknownNullability String value;
+
+        // Following field(s) have defaults and can be omitted or definhed as null by the end-user.
+        public @NotNull Boolean lock_until_next_element = true;
+
+        // Nullability cannot be determined because it depends entirely on the end-user.
+        public @UnknownNullability Integer ticks_to_wait_before_continuing;
+
+        @Override
+        public @NotNull TextElement init() throws IllegalStateException {
+            // Throwing an error in case "value" field is invalid.
+            if (value == null)
+                throw new IllegalStateException("Field \"value\" is required but is either null or has not been found.");
+            // Throwing an error in case "ticks_to_wait_before_continuing" field is invalid.
+            if (ticks_to_wait_before_continuing == null)
+                throw new IllegalStateException("Field \"ticks_to_wait_before_continuing\" is required but is either null or has not been found.");
+            // Creating and returning element.
+            return new TextElement(channel, value, lock_until_next_element, ticks_to_wait_before_continuing);
+        }
     }
 
 }

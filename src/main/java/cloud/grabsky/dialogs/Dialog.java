@@ -27,14 +27,19 @@ import cloud.grabsky.bedrock.components.Message;
 import cloud.grabsky.dialogs.elements.AnimatedTextElement;
 import cloud.grabsky.dialogs.elements.ConsoleCommandElement;
 import cloud.grabsky.dialogs.elements.TextElement;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.function.Predicate;
+import java.util.List;
+import java.util.function.BiPredicate;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -50,20 +55,41 @@ public final class Dialog implements Collection<DialogElement> {
     private final Collection<DialogElement> elements;
 
     public void trigger(final @NotNull Player target) {
-        int combinedDuration = 0;
-        // ...
+        final List<BukkitTask> queue = new ArrayList<>();
+        // Used to calculate when next queued task should be started.
+        long nextTaskStartsIn = 0;
+        // Iterating over all elements in this Dialog and scheduling to display them.
         for (final DialogElement element : elements) {
-            plugin.getBedrockScheduler().repeatAsync(combinedDuration, 2L, element.ticksToWait() / 2, createPredicate(target, element));
-            combinedDuration += element.ticksToWait();
+            if (element instanceof AnimatedTextElement animatedText) {
+                // Scheduling and adding task to the tasks list.
+                queue.add(plugin.getBedrockScheduler().repeatAsync(
+                        nextTaskStartsIn,
+                        animatedText.refreshRate(),
+                        element.ticksToWait() / animatedText.refreshRate(),
+                        createPredicate(queue, target, element))
+                );
+                // ...
+                nextTaskStartsIn += element.ticksToWait() + animatedText.refreshRate(); // Two additional ticks had to be added, possibly due to a bug. Will be investigated later on.
+                // Continuing...
+                continue;
+            }
+            // Scheduling and adding task to the tasks list.
+            queue.add(plugin.getBedrockScheduler().repeatAsync(nextTaskStartsIn, 2L, element.ticksToWait() / 2, createPredicate(queue, target, element)));
+            // ...
+            nextTaskStartsIn += element.ticksToWait() + 2L; // Two additional ticks had to be added, possibly due to a bug. Will be investigated later on.
         }
     }
 
-    private @NotNull Predicate<Integer> createPredicate(final Player target, final DialogElement element) throws IllegalArgumentException {
+    private @NotNull BiPredicate<BukkitRunnable, Integer> createPredicate(final List<BukkitTask> queue, final Player target, final DialogElement element) throws IllegalArgumentException {
         if (element instanceof TextElement textElement) {
-            return (iteration) -> {
-                // Cancelling when target happen to be offline.
-                if (target == null || target.isOnline() == false)
+            return (runnable, iteration) -> {
+                // Cancelling all remaining tasks when target happen to be offline.
+                if (target == null || target.isOnline() == false) {
+                    // Cancelling all OTHER tasks.
+                    queue.stream().filter(queuedTask -> queuedTask.getTaskId() != runnable.getTaskId()).forEach(BukkitTask::cancel);
+                    // Cancelling THIS task.
                     return false;
+                }
                 // Getting the message channel.
                 final TextElement.Channel channel = textElement.channel();
                 // Preparing the message.
@@ -85,11 +111,15 @@ public final class Dialog implements Collection<DialogElement> {
             final AnimatedTextElement.Channel channel = animatedText.channel();
             final Iterator<Component> frames = animatedText.frames().iterator();
             // Returning...
-            return (iteration) -> {
-                // Cancelling when target happen to be offline.
-                if (target == null || target.isOnline() == false)
+            return (runnable, iteration) -> {
+                // Cancelling all remaining tasks when target happen to be offline.
+                if (target == null || target.isOnline() == false) {
+                    // Cancelling all OTHER tasks.
+                    queue.stream().filter(queuedTask -> queuedTask.getTaskId() != runnable.getTaskId()).forEach(BukkitTask::cancel);
+                    // Cancelling THIS task.
                     return false;
-                // ...
+                }
+                // Preparing the message Component.
                 final Component component = (frames.hasNext() == true)
                         ? frames.next()
                         : (animatedText.lockUntilNextElement() == true)
@@ -106,14 +136,18 @@ public final class Dialog implements Collection<DialogElement> {
             };
         } else if (element instanceof ConsoleCommandElement consoleCommand) {
             // Returning...
-            return (iteration) -> {
-                // Cancelling when target happen to be offline.
-                if (target == null || target.isOnline() == false)
+            return (runnable, iteration) -> {
+                // Cancelling all remaining tasks when target happen to be offline.
+                if (target == null || target.isOnline() == false) {
+                    // Cancelling all OTHER tasks.
+                    queue.stream().filter(queuedTask -> queuedTask.getTaskId() != runnable.getTaskId()).forEach(BukkitTask::cancel);
+                    // Cancelling THIS task.
                     return false;
+                }
                 // Scheduling command execution to the main thread.
                 plugin.getBedrockScheduler().run(1L, (___) -> {
                     // Preparing command string.
-                    final String command = consoleCommand.value().replace("<player>", target.getName());
+                    final String command = PlaceholderAPI.setPlaceholders(target, consoleCommand.value());
                     // Dispatching the command.
                     plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command);
                 });

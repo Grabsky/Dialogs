@@ -28,7 +28,6 @@ import cloud.grabsky.dialogs.elements.AnimatedTextElement;
 import cloud.grabsky.dialogs.elements.ConsoleCommandElement;
 import cloud.grabsky.dialogs.elements.TextElement;
 import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.JsonWriter;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +43,7 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
     /* SINGLETON */ public static DialogElementAdapter INSTANCE = new DialogElementAdapter();
 
     @Override
-    public @Nullable DialogElement fromJson(final @NotNull JsonReader in) throws IOException {
+    public @NotNull DialogElement fromJson(final @NotNull JsonReader in) throws IOException {
         // Beginning the JSON object.
         in.beginObject();
         // Getting the type.
@@ -52,62 +51,57 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
         // Doing stuff based on the type.
         return switch (type) {
             case "text/chat_message", "text/chat_broadcast", "text/actionbar" -> {
-                // Throwing exception on unexpected input.
-                if (in.nextName().equalsIgnoreCase("value") == false)
-                    throw new JsonDataException("Expected \"value\" but found something else.");
-                // Getting the value.
-                final String value = in.nextString();
-                // Throwing exception on unexpected input.
-                if (in.nextName().equalsIgnoreCase("lock_until_next_element") == false)
-                    throw new JsonDataException("Expected \"lock_until_next_element\" but found something else.");
-                // Getting the value.
-                final boolean lockUntilNextElement = in.nextBoolean();
-                // Throwing exception on unexpected input.
-                if (in.nextName().equalsIgnoreCase("ticks_to_wait_before_continuing") == false)
-                    throw new JsonDataException("Expected \"ticks_to_wait_before_continuing\" but found something else.");
-                // Getting the value.
-                final int ticksToWait = in.nextInt();
+                final TextElement.Init init = new TextElement.Init(TextElement.Channel.fromIdentifier(type));
+                // ...
+                while (in.hasNext() == true) {
+                    final String name = in.nextName().toLowerCase();
+                    // ...
+                    switch (name) {
+                        case "value" -> init.value = in.nextString();
+                        case "lock_until_next_element" -> init.lock_until_next_element = in.nextBoolean();
+                        case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
+                    }
+                }
                 // Ending the JSON object.
                 in.endObject();
-                // Returning new instance of TextElement.
-                yield new TextElement(TextElement.Channel.fromIdentifier(type), value, lockUntilNextElement, ticksToWait);
+                // Initializing and returning the value.
+                yield init.init();
             }
             case "animated_text/actionbar" -> {
-                // Throwing exception on unexpected input.
-                if (in.nextName().equalsIgnoreCase("value") == false)
-                    throw new JsonDataException("Expected \"value\" but found something else.");
-                // Getting the value.
-                final String value = in.nextString();
-                // Throwing exception on unexpected input.
-                if (in.nextName().equalsIgnoreCase("lock_until_next_element") == false)
-                    throw new JsonDataException("Expected \"lock_until_next_element\" but found something else.");
-                // Getting the value.
-                final boolean lockUntilNextElement = in.nextBoolean();
-                // Throwing exception on unexpected input.
-                if (in.nextName().equalsIgnoreCase("ticks_to_wait_before_continuing") == false)
-                    throw new JsonDataException("Expected \"ticks_to_wait_before_continuing\" but found something else.");
-                // Getting the value.
-                final int ticksToWait = in.nextInt();
+                final AnimatedTextElement.Init init = new AnimatedTextElement.Init(AnimatedTextElement.Channel.fromIdentifier(type));
+                // ...
+                while (in.hasNext() == true) {
+                    final String name = in.nextName().toLowerCase();
+                    // ...
+                    switch (name) {
+                        case "value" -> init.value = in.nextString();
+                        case "refresh_rate" -> init.refresh_rate = in.nextLong();
+                        case "min_letters_per_frame" -> init.min_letters_per_frame = in.nextInt();
+                        case "max_letters_per_frame" -> init.max_letters_per_frame = in.nextInt();
+                        case "lock_until_next_element" -> init.lock_until_next_element = in.nextBoolean();
+                        case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
+                    }
+                }
                 // Ending the JSON object.
                 in.endObject();
-                // Returning new instance of ConsoleCommandElement.
-                yield new AnimatedTextElement(AnimatedTextElement.Channel.fromIdentifier(type), value, lockUntilNextElement, ticksToWait);
+                // Initializing and returning the value.
+                yield init.init();
             }
             case "console_command" -> {
-                // Throwing exception on unexpected input.
-                if (in.nextName().equalsIgnoreCase("value") == false)
-                    throw new JsonDataException("Expected \"value\" but found something else.");
-                // Getting the value.
-                final String value = in.nextString();
-                // Throwing exception on unexpected input.
-                if (in.nextName().equalsIgnoreCase("ticks_to_wait_before_continuing") == false)
-                    throw new JsonDataException("Expected \"ticks_to_wait_before_continuing\" but found something else.");
-                // Getting the value.
-                final int ticksToWait = in.nextInt();
+                final ConsoleCommandElement.Init init = new ConsoleCommandElement.Init();
+                // ...
+                while (in.hasNext() == true) {
+                    final String name = in.nextName().toLowerCase();
+                    // ...
+                    switch (name) {
+                        case "value" -> init.value = in.nextString();
+                        case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
+                    }
+                }
                 // Ending the JSON object.
                 in.endObject();
-                // Returning new instance of ConsoleCommandElement.
-                yield new ConsoleCommandElement(value, ticksToWait);
+                // Initializing and returning the value.
+                yield init.init();
             }
             default -> {
                 // Ending the JSON object.

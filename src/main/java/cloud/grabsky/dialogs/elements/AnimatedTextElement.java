@@ -23,10 +23,13 @@
  */
 package cloud.grabsky.dialogs.elements;
 
+import cloud.grabsky.configuration.util.LazyInit;
 import cloud.grabsky.dialogs.DialogElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -44,9 +47,20 @@ public final class AnimatedTextElement implements DialogElement {
 
     private static final Pattern TAG_PATTERN = Pattern.compile("(?=<)|(?<=>)");
 
-    public AnimatedTextElement(final AnimatedTextElement.Channel channel, final String value, final boolean lockUntilNextElement, final int ticksToWait) {
+    public AnimatedTextElement(
+            final @NotNull AnimatedTextElement.Channel channel,
+            final @NotNull String value,
+            final long refreshRate,
+            final int minLettersPerFrame,
+            final int maxLettersPerFrame,
+            final boolean lockUntilNextElement,
+            final int ticksToWait
+    ) {
         this.channel = channel;
         this.value = value;
+        this.refreshRate = refreshRate;
+        this.minLettersPerFrame = minLettersPerFrame;
+        this.maxLettersPerFrame = maxLettersPerFrame;
         this.lockUntilNextElement = lockUntilNextElement;
         this.ticksToWait = ticksToWait;
         // ...
@@ -70,7 +84,7 @@ public final class AnimatedTextElement implements DialogElement {
                 continue;
             }
             // Normal text...
-            int num = random.nextInt(2, 3);
+            int num = (minLettersPerFrame < maxLettersPerFrame) ? random.nextInt(minLettersPerFrame, maxLettersPerFrame) : maxLettersPerFrame;
             // ...
             int charsProcessed = 0;
             // ...
@@ -91,13 +105,31 @@ public final class AnimatedTextElement implements DialogElement {
      * Channel to use when forwarding this instance of {@link AnimatedTextElement}.
      */
     @Getter(AccessLevel.PUBLIC)
-    private final AnimatedTextElement.Channel channel;
+    private final @NotNull AnimatedTextElement.Channel channel;
 
     /**
      * Dialog {@link String} encoded using {@link MiniMessage} serializer.
      */
     @Getter(AccessLevel.PUBLIC)
-    private final String value;
+    private final @NotNull String value;
+
+    /**
+     * Animation refresh rate. Measured in {@code ticks}.
+     */
+    @Getter(AccessLevel.PUBLIC)
+    private final long refreshRate;
+
+    /**
+     * Minimum number of letters per frame.
+     */
+    @Getter(AccessLevel.PUBLIC)
+    private final int minLettersPerFrame;
+
+    /**
+     * Minimum number of letters per frame.
+     */
+    @Getter(AccessLevel.PUBLIC)
+    private final int maxLettersPerFrame;
 
     /**
      * Returns {@code true} if this instance of {@link AnimatedTextElement} should lock on last frame while waiting for the next dialog.
@@ -150,6 +182,39 @@ public final class AnimatedTextElement implements DialogElement {
             throw new IllegalArgumentException(identifier);
         }
 
+    }
+
+
+    @Internal // NOTE: Field names does not follow Java Naming Convention to provide 1:1 mapping with JSON keys.
+    @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
+    public static final class Init implements LazyInit<AnimatedTextElement> {
+
+        // Not an actual JSON field, filled by JsonAdapter based on context.
+        private final @NotNull AnimatedTextElement.Channel channel;
+
+        // Nullability cannot be determined because it depends entirely on the end-user.
+        public @UnknownNullability String value;
+
+        // Following field(s) have defaults and can be omitted or definhed as null by the end-user.
+        public @NotNull Long refresh_rate = 2L;
+        public @NotNull Integer min_letters_per_frame = 2;
+        public @NotNull Integer max_letters_per_frame = 3;
+        public @NotNull Boolean lock_until_next_element = true;
+
+        // Nullability cannot be determined because it depends entirely on the end-user.
+        public @UnknownNullability Integer ticks_to_wait_before_continuing;
+
+        @Override
+        public @NotNull AnimatedTextElement init() throws IllegalStateException {
+            // Throwing an error in case "value" field is invalid.
+            if (value == null)
+                throw new IllegalStateException("Field \"value\" is required but is either null or has not been found.");
+            // Throwing an error in case "ticks_to_wait_before_continuing" field is invalid.
+            if (ticks_to_wait_before_continuing == null)
+                throw new IllegalStateException("Field \"ticks_to_wait_before_continuing\" is required but is either null or has not been found.");
+            // Creating and returning element.
+            return new AnimatedTextElement(channel, value, refresh_rate, min_letters_per_frame, max_letters_per_frame, lock_until_next_element, ticks_to_wait_before_continuing);
+        }
     }
 
 }

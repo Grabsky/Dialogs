@@ -48,6 +48,9 @@ public final class Dialogs extends BedrockPlugin implements Listener {
     @Getter(AccessLevel.PUBLIC)
     private static Dialogs instance;
 
+    @Getter(AccessLevel.PUBLIC)
+    private static boolean isPlaceholderAPI;
+
     private ConfigurationMapper mapper;
 
     @Override
@@ -55,6 +58,12 @@ public final class Dialogs extends BedrockPlugin implements Listener {
         super.onEnable();
         // ...
         instance = this;
+        // ...
+        try {
+            Class.forName("me.clip.placeholderapi.PlaceholderAPI");
+            // Mark PlaceholderAPI as present
+            isPlaceholderAPI = true;
+        } catch (final ClassNotFoundException ___) { /* IGNORE */ }
         // ...
         this.mapper = PaperConfigurationMapper.create(moshi -> moshi.add(DialogElement.class, DialogElementAdapter.INSTANCE));
         // ...

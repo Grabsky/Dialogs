@@ -49,7 +49,6 @@ public final class Dialog implements Collection<DialogElement> {
     @Delegate @Getter(AccessLevel.PUBLIC)
     private final Collection<DialogElement> elements;
 
-    // TO-DO: Fix last element having their #ticksToWait ignored. It's happening because combinedDuration is increased AFTER the last task has been started.
     public void trigger(final @NotNull Player target) {
         int combinedDuration = 0;
         // ...
@@ -59,7 +58,7 @@ public final class Dialog implements Collection<DialogElement> {
         }
     }
 
-    private @NotNull Predicate<Integer> createPredicate(final Player target, final DialogElement element) throws UnsupportedOperationException {
+    private @NotNull Predicate<Integer> createPredicate(final Player target, final DialogElement element) throws IllegalArgumentException {
         if (element instanceof TextElement textElement) {
             return (iteration) -> {
                 // Cancelling when target happen to be offline.
@@ -73,7 +72,11 @@ public final class Dialog implements Collection<DialogElement> {
                 switch (channel) {
                     case CHAT_MESSAGE -> message.send(target);
                     case CHAT_BROADCAST -> message.broadcast();
-                    case ACTIONBAR -> message.sendActionBar(target);
+                    case ACTIONBAR -> {
+                        message.sendActionBar(target);
+                        // Returning true when TextElement#lockUntilNextElement is true. Makes the task re-execute until iterations limit is reached.
+                        return textElement.lockUntilNextElement() == true;
+                    }
                 }
                 // Exiting...
                 return false;
@@ -89,10 +92,10 @@ public final class Dialog implements Collection<DialogElement> {
                 // ...
                 final Component component = (frames.hasNext() == true)
                         ? frames.next()
-                        : (animatedText.isLockOnLastFrame() == true)
+                        : (animatedText.lockUntilNextElement() == true)
                                 ? animatedText.lastFrame()
                                 : null;
-                // ...
+                // Currently only action bar messages can be "animated".
                 switch (channel) {
                     case ACTIONBAR -> Message.of(component).sendActionBar(target);
                 }
@@ -107,11 +110,11 @@ public final class Dialog implements Collection<DialogElement> {
                 // Cancelling when target happen to be offline.
                 if (target == null || target.isOnline() == false)
                     return false;
-                // ...
+                // Scheduling command execution to the main thread.
                 plugin.getBedrockScheduler().run(1L, (___) -> {
                     // Preparing command string.
                     final String command = consoleCommand.value().replace("<player>", target.getName());
-                    // Scheduling command execution to the main thread.
+                    // Dispatching the command.
                     plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command);
                 });
                 // Exiting...
@@ -119,7 +122,7 @@ public final class Dialog implements Collection<DialogElement> {
             };
         }
         // ...
-        throw new UnsupportedOperationException("UNSUPPORTED_ELEMENT_TYPE");
+        throw new IllegalArgumentException("Dialog element instance of class \"" + element.getClass().getSimpleName() + "\" is not supported.");
     }
 
 }

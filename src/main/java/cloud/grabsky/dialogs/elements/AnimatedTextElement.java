@@ -44,10 +44,10 @@ public final class AnimatedTextElement implements DialogElement {
 
     private static final Pattern TAG_PATTERN = Pattern.compile("(?=<)|(?<=>)");
 
-    public AnimatedTextElement(final AnimatedTextElement.Channel channel, final String value, final boolean isLockOnLastFrame, final int ticksToWait) {
+    public AnimatedTextElement(final AnimatedTextElement.Channel channel, final String value, final boolean lockUntilNextElement, final int ticksToWait) {
         this.channel = channel;
         this.value = value;
-        this.isLockOnLastFrame = isLockOnLastFrame;
+        this.lockUntilNextElement = lockUntilNextElement;
         this.ticksToWait = ticksToWait;
         // ...
         final ArrayList<Component> frames = new ArrayList<>();
@@ -103,7 +103,7 @@ public final class AnimatedTextElement implements DialogElement {
      * Returns {@code true} if this instance of {@link AnimatedTextElement} should lock on last frame while waiting for the next dialog.
      */
     @Getter(AccessLevel.PUBLIC)
-    private final boolean isLockOnLastFrame;
+    private final boolean lockUntilNextElement;
 
     /**
      * Pause to wait after displaying this {@link AnimatedTextElement}. Measured in {@code ticks}.

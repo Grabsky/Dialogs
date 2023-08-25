@@ -33,13 +33,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 
 @Accessors(fluent = true)
+@RequiredArgsConstructor(access = AccessLevel.PUBLIC)
 public final class TextElement implements DialogElement {
-
-    public TextElement(final TextElement.Channel channel, final String value, final int ticksToWait) {
-        this.channel = channel;
-        this.value = value;
-        this.ticksToWait = ticksToWait;
-    }
 
     /**
      * Channel to use when forwarding this instance of {@link AnimatedTextElement}.
@@ -52,6 +47,12 @@ public final class TextElement implements DialogElement {
      */
     @Getter(AccessLevel.PUBLIC)
     private final String value;
+
+    /**
+     * Returns {@code true} if this instance of {@link AnimatedTextElement} should lock on last frame while waiting for the next dialog.
+     */
+    @Getter(AccessLevel.PUBLIC)
+    private final boolean lockUntilNextElement;
 
     /**
      * Pause to wait after displaying this {@link TextElement}. Measured in {@code ticks}.

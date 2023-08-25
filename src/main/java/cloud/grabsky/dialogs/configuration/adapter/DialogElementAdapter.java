@@ -58,6 +58,11 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
                 // Getting the value.
                 final String value = in.nextString();
                 // Throwing exception on unexpected input.
+                if (in.nextName().equalsIgnoreCase("lock_until_next_element") == false)
+                    throw new JsonDataException("Expected \"lock_until_next_element\" but found something else.");
+                // Getting the value.
+                final boolean lockUntilNextElement = in.nextBoolean();
+                // Throwing exception on unexpected input.
                 if (in.nextName().equalsIgnoreCase("ticks_to_wait_before_continuing") == false)
                     throw new JsonDataException("Expected \"ticks_to_wait_before_continuing\" but found something else.");
                 // Getting the value.
@@ -65,7 +70,7 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
                 // Ending the JSON object.
                 in.endObject();
                 // Returning new instance of TextElement.
-                yield new TextElement(TextElement.Channel.fromIdentifier(type), value, ticksToWait);
+                yield new TextElement(TextElement.Channel.fromIdentifier(type), value, lockUntilNextElement, ticksToWait);
             }
             case "animated_text/actionbar" -> {
                 // Throwing exception on unexpected input.
@@ -74,10 +79,10 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
                 // Getting the value.
                 final String value = in.nextString();
                 // Throwing exception on unexpected input.
-                if (in.nextName().equalsIgnoreCase("lock_on_last_frame") == false)
-                    throw new JsonDataException("Expected \"lock_on_last_frame\" but found something else.");
+                if (in.nextName().equalsIgnoreCase("lock_until_next_element") == false)
+                    throw new JsonDataException("Expected \"lock_until_next_element\" but found something else.");
                 // Getting the value.
-                final boolean lockOnLastFrame = in.nextBoolean();
+                final boolean lockUntilNextElement = in.nextBoolean();
                 // Throwing exception on unexpected input.
                 if (in.nextName().equalsIgnoreCase("ticks_to_wait_before_continuing") == false)
                     throw new JsonDataException("Expected \"ticks_to_wait_before_continuing\" but found something else.");
@@ -86,7 +91,7 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
                 // Ending the JSON object.
                 in.endObject();
                 // Returning new instance of ConsoleCommandElement.
-                yield new AnimatedTextElement(AnimatedTextElement.Channel.fromIdentifier(type), value, lockOnLastFrame, ticksToWait);
+                yield new AnimatedTextElement(AnimatedTextElement.Channel.fromIdentifier(type), value, lockUntilNextElement, ticksToWait);
             }
             case "console_command" -> {
                 // Throwing exception on unexpected input.

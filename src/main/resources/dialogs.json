@@ -5,24 +5,25 @@
                 {
                     "type": "animated_text/actionbar",
                     "value": "<aqua>Allay<dark_gray>: <white>Witaj... podejdź bliżej jeżeli potrzebujesz pomocy.",
-                    "lock_on_last_frame": true,
-                    "ticks_to_wait_before_continuing": 100
+                    "lock_until_next_element": false,
+                    "ticks_to_wait_before_continuing": 40
                 },
                 {
                     "type": "console_command",
                     "value": "give <player> minecraft:diamond 1",
-                    "ticks_to_wait_before_continuing": 100
+                    "ticks_to_wait_before_continuing": 40
                 },
                 {
                     "type": "animated_text/actionbar",
                     "value": "<aqua>Allay<dark_gray>: <white>Witaj... ponownie?",
-                    "lock_on_last_frame": false,
-                    "ticks_to_wait_before_continuing": 200
+                    "lock_until_next_element": true,
+                    "ticks_to_wait_before_continuing": 40
                 },
                 {
                     "type": "text/actionbar",
                     "value": "<#4e5c24>炙",
-                    "ticks_to_wait_before_continuing": 100
+                    "lock_until_next_element": true,
+                    "ticks_to_wait_before_continuing": 400
                 }
             ]
         }

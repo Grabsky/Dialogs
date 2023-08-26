@@ -1,6 +1,9 @@
 # Dialogs
 Plugin for [PaperMC/Paper](https://github.com/PaperMC/Paper) servers granting you ability to create complex dialogs and display them to your players.
 
+### Default Configuration Showcase
+https://github.com/Grabsky/Dialogs/assets/44530932/4c975a4d-fe33-4c8c-85ac-f3a6c80160f0
+
 <br />
 
 ## Requirements

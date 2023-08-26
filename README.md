@@ -14,6 +14,6 @@ Requires **Java 17** (or higher) and **Paper 1.20.1 #161** (or higher).
 $ git clone https://github.com/Grabsky/Dialogs.git
 # Entering cloned repository
 $ cd ./Dialogs
-# Compiling and publishing to maven local
+# Compiling
 $ ./gradlew clean aseemble
 ```

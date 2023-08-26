@@ -20,7 +20,7 @@
                 {
                     "type": "animated_text/actionbar",
                     // Text to be displayed. Frames are generated automatically.
-                    "value": "<gold>Somebody<dark_gray>: <white>Here, take this... You may find that useful.",
+                    "value": "<gold>Somebody<dark_gray>: <white>Here, take this... may come in handy...",
                     // Ticks to wait before continuing to the next element in the queue. Can be ommited for non-animated elements.
                     "ticks_to_wait_before_continuing": 100
                 },

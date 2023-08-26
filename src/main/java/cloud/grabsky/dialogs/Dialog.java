@@ -31,13 +31,10 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -53,7 +50,6 @@ public final class Dialog implements Collection<DialogElement> {
     private final Collection<DialogElement> elements;
 
     public void trigger(final @NotNull Player target) {
-        final List<BukkitTask> queue = new ArrayList<>();
         // Used to calculate when next queued task should be started.
         long nextTaskStartsIn = 0;
         // Iterating over all elements in this Dialog and scheduling to display them.
@@ -122,6 +118,7 @@ public final class Dialog implements Collection<DialogElement> {
                 });
                 // Calculating "start" time of the next element.
                 nextTaskStartsIn += element.ticksToWait();
+
             }
         }
     }

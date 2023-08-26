@@ -82,6 +82,11 @@ public final class Dialog implements Collection<DialogElement> {
 
     private @NotNull BiPredicate<BukkitRunnable, Integer> createPredicate(final List<BukkitTask> queue, final Player target, final DialogElement element) throws IllegalArgumentException {
         if (element instanceof TextElement textElement) {
+            // Parsing the message, setting placeholders if supported.
+            final Message.StringMessage message = (Dialogs.isPlaceholderAPI() == true)
+                    ? Message.of(PlaceholderAPI.setPlaceholders(target, textElement.value()))
+                    : Message.of(textElement.value());
+            // Returning...
             return (runnable, iteration) -> {
                 // Cancelling all remaining tasks when target happen to be offline.
                 if (target == null || target.isOnline() == false) {
@@ -92,8 +97,6 @@ public final class Dialog implements Collection<DialogElement> {
                 }
                 // Getting the message channel.
                 final TextElement.Channel channel = textElement.channel();
-                // Preparing the message.
-                final Message.StringMessage message = Message.of(textElement.value());
                 // Sending message based on channel type.
                 switch (channel) {
                     case CHAT_MESSAGE -> message.send(target);
@@ -147,7 +150,7 @@ public final class Dialog implements Collection<DialogElement> {
                 // Scheduling command execution to the main thread.
                 plugin.getBedrockScheduler().run(1L, (___) -> {
                     // Preparing command string.
-                    final String command = PlaceholderAPI.setPlaceholders(target, consoleCommand.value());
+                    final String command = (Dialogs.isPlaceholderAPI() == true) ? PlaceholderAPI.setPlaceholders(target, consoleCommand.value()) : consoleCommand.value();
                     // Dispatching the command.
                     plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command);
                 });

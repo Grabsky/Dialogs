@@ -44,17 +44,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-@Command(name = "dialogs", permission = "dialogs.command.dialogs")
+@Command(name = "dialogs", permission = "dialogs.command.dialogs", usage = "/dialogs (...)")
 public final class DialogsCommand extends RootCommand {
 
     @Dependency
     private @UnknownNullability Dialogs plugin;
 
-
-    private static final Pattern TAG_PATTERN = Pattern.compile("<[^>]*>");
 
     private static final ExceptionHandler.Factory DIALOGS_SEND_USAGE = (exception) -> {
         if (exception instanceof MissingInputException)
@@ -85,7 +82,6 @@ public final class DialogsCommand extends RootCommand {
                 case 2 -> CompletionsProvider.of(PluginDialogs.DIALOGS.keySet());
                 default -> CompletionsProvider.EMPTY;
             };
-            // ...
             default -> CompletionsProvider.EMPTY;
         };
     }
@@ -94,30 +90,46 @@ public final class DialogsCommand extends RootCommand {
     @Override
     public void onCommand(final @NotNull RootCommandContext context, final @NotNull ArgumentQueue arguments) throws CommandLogicException {
         final CommandSender sender = context.getExecutor().asCommandSender();
-        // ...
+        // Showing usage when no argument has been provided.
         if (arguments.hasNext() == false) {
             Message.of(PluginLocale.COMMAND_DIALOGS_USAGE).send(sender);
             return;
         }
-        // ...
+        // Getting first argument as String.
         final String argument = arguments.next(String.class).asRequired().toLowerCase();
-        // ...
+        // Doing stuff based on whatever the first argument is.
         switch (argument) {
+            // Showing usage when invalid/unexpected argument has been provided.
+            default -> Message.of(PluginLocale.COMMAND_DIALOGS_USAGE).send(sender);
+            // Handling "/dialogs reload" command...
             case "reload" -> {
-                plugin.reloadConfiguration();
-            }
-            case "send" -> {
-                final Player target = arguments.next(Player.class).asRequired(DIALOGS_SEND_USAGE);
-                final String dialogIdentifier = arguments.next(String.class).asRequired(DIALOGS_SEND_USAGE);
-                // ...
-                final @Nullable Dialog dialog = PluginDialogs.DIALOGS.get(dialogIdentifier);
-                // Sending error message in case dialog with specified identifier was not found.
-                if (dialog == null || dialog.isEmpty() == true) {
-                    Message.of(PluginLocale.COMMAND_DIALOGS_SEND_FAILURE_NOT_FOUND).placeholder("input", dialogIdentifier).send(sender);
+                if (sender.hasPermission(this.getPermission() + ".reload") == true) {
+                    final boolean isSuccess = plugin.reloadConfiguration();
+                    // Sending message to the sender.
+                    Message.of(isSuccess == true ? PluginLocale.COMMAND_DIALOGS_RELOAD_SUCCESS : PluginLocale.COMMAND_DIALOGS_RELOAD_FAILURE).send(sender);
                     return;
                 }
-                // Triggering Dialog on specified target.
-                dialog.trigger(target);
+                // Sending error message to the sender.
+                Message.of(PluginLocale.Commands.MISSING_PERMISSIONS).send(sender);
+            }
+            // Handling "/dialogs send (...)" command...
+            case "send" -> {
+                if (sender.hasPermission(this.getPermission() + ".send") == true) {
+                    final Player target = arguments.next(Player.class).asRequired(DIALOGS_SEND_USAGE);
+                    final String dialogIdentifier = arguments.next(String.class).asRequired(DIALOGS_SEND_USAGE);
+                    // Getting dialog from specified identifier.
+                    final @Nullable Dialog dialog = PluginDialogs.DIALOGS.get(dialogIdentifier);
+                    // Sending error message in case dialog with specified identifier was not found.
+                    if (dialog == null || dialog.isEmpty() == true) {
+                        Message.of(PluginLocale.COMMAND_DIALOGS_SEND_FAILURE_NOT_FOUND).placeholder("input", dialogIdentifier).send(sender);
+                        return;
+                    }
+                    // Triggering Dialog on specified target.
+                    dialog.trigger(target);
+                    return;
+                }
+                // Sending error message to the sender.
+                Message.of(PluginLocale.Commands.MISSING_PERMISSIONS).send(sender);
             }
         }
     }

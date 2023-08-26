@@ -29,8 +29,20 @@ import net.kyori.adventure.text.Component;
 
 public final class PluginLocale implements JsonConfiguration {
 
+    // Commands > Dialogs
+
     @JsonPath("commands.dialogs_usage")
     public static Component COMMAND_DIALOGS_USAGE;
+
+    // Commands > Dialogs > Reload
+
+    @JsonPath("commands.dialogs_reload_success")
+    public static Component COMMAND_DIALOGS_RELOAD_SUCCESS;
+
+    @JsonPath("commands.dialogs_reload_failure")
+    public static Component COMMAND_DIALOGS_RELOAD_FAILURE;
+
+    // Commands > Dialogs > Send
 
     @JsonPath("commands.dialogs_send_usage")
     public static Component COMMAND_DIALOGS_SEND_USAGE;

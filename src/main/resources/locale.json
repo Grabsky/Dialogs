@@ -2,10 +2,15 @@
     "commands": {
         "dialogs_usage": [
             "",
-            "<dark_gray>›  <gold>/dialogs send <white>(player) (dialog_id) (duration_ticks)",
+            "<dark_gray>›  <gold>/dialogs reload",
+            "<dark_gray>›  <gold>/dialogs send <white>(player) (dialog_id)",
             ""
         ],
-        "dialogs_send_usage": "<dark_gray>› <gray>Użycie: <gold>/dialogs send <white>(player) (dialog_id) (duration_ticks)",
-        "dialogs_send_failure_not_found": "<dark_gray>› <red>Dialog <gold><input><red> nie został odnaleziony."
+        // Dialogs > Reload
+        "dialogs_reload_success": "<dark_gray>› <gray>Plugin <gold>Dialogs<gray> has been reloaded.",
+        "dialogs_reload_failure": "<dark_gray>› <red>An error occurred while trying to reload <gold>Dialogs<red> plugin. See console for more details.",
+        // Dialogs > Send
+        "dialogs_send_usage": "<dark_gray>› <gray>Usage: <gold>/dialogs send <white>(player) (dialog_id)",
+        "dialogs_send_failure_not_found": "<dark_gray>› <red>Dialog <gold><input><red> has not been found."
     }
 }

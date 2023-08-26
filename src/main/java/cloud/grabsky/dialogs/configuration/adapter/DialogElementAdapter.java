@@ -58,7 +58,6 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
                     // ...
                     switch (name) {
                         case "value" -> init.value = in.nextString();
-                        case "lock_until_next_element" -> init.lock_until_next_element = in.nextBoolean();
                         case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
                     }
                 }

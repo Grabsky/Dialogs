@@ -50,16 +50,13 @@ public class ConsoleCommandElement implements DialogElement {
 
         // Nullability cannot be determined because it depends entirely on the end-user.
         public @UnknownNullability String value;
-        public @UnknownNullability Integer ticks_to_wait_before_continuing;
+        public @NotNull Integer ticks_to_wait_before_continuing = 1;
 
         @Override
         public @NotNull ConsoleCommandElement init() throws IllegalStateException {
             // Throwing an error in case "value" field is invalid.
             if (value == null)
                 throw new IllegalStateException("Field \"value\" is required but is either null or has not been found.");
-            // Throwing an error in case "ticks_to_wait_before_continuing" field is invalid.
-            if (ticks_to_wait_before_continuing == null)
-                throw new IllegalStateException("Field \"ticks_to_wait_before_continuing\" is required but is either null or has not been found.");
             // Creating and returning element.
             return new ConsoleCommandElement(value, ticks_to_wait_before_continuing);
         }

@@ -52,12 +52,6 @@ public final class TextElement implements DialogElement {
     private final String value;
 
     /**
-     * Returns {@code true} if this instance of {@link AnimatedTextElement} should lock on last frame while waiting for the next dialog.
-     */
-    @Getter(AccessLevel.PUBLIC)
-    private final boolean lockUntilNextElement;
-
-    /**
      * Pause to wait after displaying this {@link TextElement}. Measured in {@code ticks}.
      */
     @Getter(AccessLevel.PUBLIC)
@@ -99,21 +93,15 @@ public final class TextElement implements DialogElement {
         public @UnknownNullability String value;
 
         // Following field(s) have defaults and can be omitted or definhed as null by the end-user.
-        public @NotNull Boolean lock_until_next_element = true;
-
-        // Nullability cannot be determined because it depends entirely on the end-user.
-        public @UnknownNullability Integer ticks_to_wait_before_continuing;
+        public @NotNull Integer ticks_to_wait_before_continuing = 1;
 
         @Override
         public @NotNull TextElement init() throws IllegalStateException {
             // Throwing an error in case "value" field is invalid.
             if (value == null)
                 throw new IllegalStateException("Field \"value\" is required but is either null or has not been found.");
-            // Throwing an error in case "ticks_to_wait_before_continuing" field is invalid.
-            if (ticks_to_wait_before_continuing == null)
-                throw new IllegalStateException("Field \"ticks_to_wait_before_continuing\" is required but is either null or has not been found.");
             // Creating and returning element.
-            return new TextElement(channel, value, lock_until_next_element, ticks_to_wait_before_continuing);
+            return new TextElement(channel, value, ticks_to_wait_before_continuing);
         }
     }
 

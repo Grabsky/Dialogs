@@ -2,7 +2,7 @@ name: Gradle Assemble
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "feature/workflows"]
 
 permissions:
   contents: read

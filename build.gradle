@@ -3,18 +3,22 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
+// See "deploy" task registered below as to find out why it's here.
 final buildsDirectory = (System.getenv("JVM_BUILDS") ?: null)
 final pluginsDirectory = (System.getenv("PLUGINS_DIR") ?: null)
 
 group = "cloud.grabsky"
-version = "0.9.0-SNAPSHOT"
+version = "1.0"
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
     mavenLocal()
     mavenCentral()
+    maven { url = "https://repo.grabsky.cloud/releases" }
     maven { url = "https://repo.grabsky.cloud/snapshots" }
     maven { url = "https://papermc.io/repo/repository/maven-public/" }
     maven { url = "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
@@ -24,20 +28,30 @@ dependencies {
     // Lombok
     compileOnly("org.projectlombok:lombok:1.18.26")
     annotationProcessor("org.projectlombok:lombok:1.18.26")
-    // Paper
+    // Paper API
     compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
-    // Bedrock
+    // Utility, Commands and Configuration libraries
     implementation("cloud.grabsky:bedrock:52ad945")
-    implementation("cloud.grabsky:commands:a2eb7f9")
+    implementation("cloud.grabsky:commands:1.1")
     implementation("cloud.grabsky:configuration-paper:0.9.7")
     // PlaceholderAPI
     compileOnly("me.clip:placeholderapi:2.11.3")
 }
 
 tasks {
-    shadowJar { archiveFileName = "${rootProject.name}-${project.version}.jar" }
+    shadowJar {
+        archiveFileName = "${rootProject.name}-${project.version}.jar"
+    }
+    compileJava {
+        options.fork = true
+        // Setting compatibility to Java 17 (above should work too)
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }
 
+// Copies produced .jar to $JVM_BUILDS and $PLUGINS_DIR directories specfied as environment variables.
+// This is solely for debugging/development purposes and does nothing when said variables are not set.
 tasks.register("deploy") {
     dependsOn(shadowJar)
     doLast {
@@ -48,8 +62,4 @@ tasks.register("deploy") {
         if (pluginsDirectory != null)
             copy { from(shadowJar) into(pluginsDirectory) }
     }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.fork = true
 }

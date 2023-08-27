@@ -21,5 +21,7 @@ $ cd ./Dialogs
 $ ./gradlew clean aseemble
 ```
 
+<br />
+
 ## Contributing
 This project is open for contributions. Help in regards of improving performance, adding new features or fixing bugs is greatly appreciated.

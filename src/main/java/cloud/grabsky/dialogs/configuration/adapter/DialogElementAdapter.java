@@ -23,6 +23,7 @@
  */
 package cloud.grabsky.dialogs.configuration.adapter;
 
+import cloud.grabsky.configuration.paper.adapter.StringComponentAdapter;
 import cloud.grabsky.dialogs.DialogElement;
 import cloud.grabsky.dialogs.elements.AnimatedTextElement;
 import cloud.grabsky.dialogs.elements.ConsoleCommandElement;
@@ -57,7 +58,14 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
                     final String name = in.nextName().toLowerCase();
                     // ...
                     switch (name) {
-                        case "value" -> init.value = in.nextString();
+                        case "value" -> {
+                            switch (type) {
+                                // StringComponentAdapter supports single-value strings and arrays by joining entries with <newline> delimer.
+                                case "text/chat_message", "text/chat_broadcast" -> init.value = StringComponentAdapter.INSTANCE.fromJson(in);
+                                // Non-chat messages are single-line only.
+                                default -> init.value = in.nextString();
+                            }
+                        }
                         case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
                     }
                 }

@@ -11,13 +11,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Checking up
       - uses: actions/checkout@v3
+      # Setting up Java 17
       - name: JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
+      # Building
       - name: Clean Assemble
         uses: gradle/gradle-build-action@v2
         with:
           arguments: clean assemble
+      # Uploading artifacts
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Package
+          path: build/libs

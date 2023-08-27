@@ -8,7 +8,7 @@ final buildsDirectory = (System.getenv("JVM_BUILDS") ?: null)
 final pluginsDirectory = (System.getenv("PLUGINS_DIR") ?: null)
 
 group = "cloud.grabsky"
-version = "0.9.0-SNAPSHOT"
+version = "1.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17

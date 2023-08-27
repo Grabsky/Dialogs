@@ -2,7 +2,7 @@ name: Gradle Assemble
 
 on:
   push:
-    branches: ["main", "feature/workflows"]
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -24,9 +24,9 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: clean assemble
-      # Uploading artifacts
+      # Uploading artifact(s)
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: Package
+          name: Artifacts
           path: build/libs

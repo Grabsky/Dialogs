@@ -99,8 +99,6 @@ public final class DialogsCommand extends RootCommand {
         final String argument = arguments.next(String.class).asRequired().toLowerCase();
         // Doing stuff based on whatever the first argument is.
         switch (argument) {
-            // Showing usage when invalid/unexpected argument has been provided.
-            default -> Message.of(PluginLocale.COMMAND_DIALOGS_USAGE).send(sender);
             // Handling "/dialogs reload" command...
             case "reload" -> {
                 if (sender.hasPermission(this.getPermission() + ".reload") == true) {
@@ -131,6 +129,8 @@ public final class DialogsCommand extends RootCommand {
                 // Sending error message to the sender.
                 Message.of(PluginLocale.Commands.MISSING_PERMISSIONS).send(sender);
             }
+            // Showing usage when invalid/unexpected argument has been provided.
+            default -> Message.of(PluginLocale.COMMAND_DIALOGS_USAGE).send(sender);
         }
     }
 }

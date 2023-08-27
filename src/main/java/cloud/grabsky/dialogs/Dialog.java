@@ -118,8 +118,8 @@ public final class Dialog implements Collection<DialogElement> {
                 });
                 // Calculating "start" time of the next element.
                 nextTaskStartsIn += element.ticksToWait();
-
             }
+
         }
     }
 

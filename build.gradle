@@ -8,18 +8,12 @@ final buildsDirectory = (System.getenv("JVM_BUILDS") ?: null)
 final pluginsDirectory = (System.getenv("PLUGINS_DIR") ?: null)
 
 group = "cloud.grabsky"
-version = "1.1-SNAPSHOT"
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
+version = "1.20.1-${System.getenv("GITHUB_RUN_NUMBER") ?: "dev"}"
 
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url = "https://repo.grabsky.cloud/releases" }
-    maven { url = "https://repo.grabsky.cloud/snapshots" }
+    maven { url = "https://repo.grabsky.cloud/releases/" }
     maven { url = "https://papermc.io/repo/repository/maven-public/" }
     maven { url = "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
 }
@@ -30,10 +24,10 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.26")
     // Paper API
     compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
-    // Utility, Commands and Configuration libraries
-    implementation("cloud.grabsky:bedrock:52ad945")
-    implementation("cloud.grabsky:commands:1.1")
-    implementation("cloud.grabsky:configuration-paper:0.9.7")
+    // Libraries
+    implementation("cloud.grabsky:bedrock:1.20.1-44")
+    implementation("cloud.grabsky:commands:1.20.1-34")
+    implementation("cloud.grabsky:configuration-paper:1.20.1-42")
     // PlaceholderAPI
     compileOnly("me.clip:placeholderapi:2.11.3")
 }
@@ -44,9 +38,14 @@ tasks {
     }
     compileJava {
         options.fork = true
-        // Setting compatibility to Java 17 (above should work too)
+        // Setting compatibility to Java 17 (above should work too).
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    processResources {
+        filesMatching("paper-plugin.yml") {
+            expand(name: rootProject.name, version: rootProject.version)
+        }
     }
 }
 

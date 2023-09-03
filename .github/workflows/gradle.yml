@@ -23,7 +23,7 @@ jobs:
       - name: Clean Assemble
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: clean assemble
+          arguments: clean shadowJar
       # Uploading artifact(s)
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3

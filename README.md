@@ -25,11 +25,14 @@ List of things that **may** be implemented in the future:
 - [ ] Replace `dialogs.json` file with `plugins/Dialogs/dialogs/` directory which can contain multiple files defining dialogs. This allows to form groups/categories of dialogs which will drastically improve readability/edit times for servers with lots of them. This may involve some breaking configuration changes.
 - [ ] More elements, including but not limited to titles, subtitles and perhaps toast pop-ups.
 - [ ] Cancel current dialog when new one is displayed.
+
 <br />
 
 ## Known Issues
 List of known issues that will be fixed in the upcoming plugin release(s):
-- Multiple dialogs can be shown to player at once, causing them to overlap.
+- [ ] Multiple dialogs can be shown to player at once, causing them to overlap.
+
+<br />
 
 ## Building (Linux)
 ```shell

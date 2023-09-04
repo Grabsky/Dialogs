@@ -1,0 +1,71 @@
+{
+    // Dialogs can be used to compose basic, single-element messages.
+    "simple_example": {
+        // Elements array. Supported element types are: [animated_text/actionbar, text/chat_message, text/broadcast_message, console_command]
+        "elements": [
+            {
+                "type": "text/chat_message",
+                // Text to be displayed. Supports PlaceholderAPI and mutliple lines.
+                "value": [
+                    " Welcome, <gold>%player_name%<white> to the server.",
+                    " <r>",
+                    " Type <gold>/help<white> for a list of commands."
+                ]
+            }
+        ]
+    },
+    // Other example of single-element dialog.
+    "broadcast_example": {
+        // Elements array. Supported element types are: [animated_text/actionbar, text/chat_message, text/broadcast_message, console_command]
+        "elements": [
+            // Chat broadcast element sends the message to everyone.
+            {
+                "type": "text/chat_broadcast",
+                // Text to be displayed. Supports PlaceholderAPI and mutliple lines.
+                "value": "<gold>%player_name%<white> has joined the server for the first time."
+            }
+        ]
+    },
+    // Dialogs can also be used to compose complex chains of multi-type elements.
+    "complex_example": {
+        // Elements array. Supported element types are: [animated_text/actionbar, text/chat_message, text/broadcast_message, console_command]
+        "elements": [
+            // Animated element showcasing all possible properties that can be configured.
+            {
+                "type": "animated_text/actionbar",
+                // Text to be displayed. Frames are generated automatically.
+                "value": "<gold>Somebody<dark_gray>: <white>Welcome to the city, stranger...",
+                // Optional refresh rate measured in ticks. (DEFAULT = 2)
+                "refresh_rate": 1,
+                // Optional minimum number of letters animated per frame. (DEFAULT = 2)
+                "min_letters_per_frame": 1,
+                // Optional maximum number of letters animated per frame. (DEFAULT = 3)
+                "max_letters_per_frame": 1,
+                // Optional toggle whether last frame should persist until the next element. (DEFAULT = true)
+                "lock_until_next_element": true,
+                // Ticks to wait before continuing to the next element in the queue. Can be omitted for non-animated elements.
+                "ticks_to_wait_before_continuing": 80
+            },
+            // Similar as above, but now with default properties.
+            {
+                "type": "animated_text/actionbar",
+                // Text to be displayed. Frames are generated automatically.
+                "value": "<gold>Somebody<dark_gray>: <white>Here, take this... may come in handy...",
+                // Ticks to wait before continuing to the next element in the queue. Can be omitted for non-animated elements.
+                "ticks_to_wait_before_continuing": 100
+            },
+            // Console command element does exactly what you think it does.
+            {
+                "type": "console_command",
+                // Command to be executed. Supports PlaceholderAPI.
+                "value": "minecraft:give %player_name% minecraft:iron_sword{Damage:177} 1"
+            },
+            // Chat message element sends message to the player.
+            {
+                "type": "text/chat_message",
+                // Text to be displayed. Supports PlaceholderAPI and mutliple lines.
+                "value": "<gold><italic>Stranger<gray> gave <gold>%player_name%<gray> an old, rusty <white>Iron Sword<gray>..."
+            }
+        ]
+    }
+}

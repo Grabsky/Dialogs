@@ -36,7 +36,6 @@ import cloud.grabsky.commands.exception.CommandLogicException;
 import cloud.grabsky.commands.exception.MissingInputException;
 import cloud.grabsky.dialogs.Dialog;
 import cloud.grabsky.dialogs.Dialogs;
-import cloud.grabsky.dialogs.configuration.PluginDialogs;
 import cloud.grabsky.dialogs.configuration.PluginLocale;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -79,7 +78,7 @@ public final class DialogsCommand extends RootCommand {
         return switch (literal) {
             case "send" -> switch (index) {
                 case 1 -> CompletionsProvider.of(Player.class);
-                case 2 -> CompletionsProvider.of(PluginDialogs.DIALOGS.keySet());
+                case 2 -> CompletionsProvider.of(plugin.getDialogsLoader().getDialogs().keySet());
                 default -> CompletionsProvider.EMPTY;
             };
             default -> CompletionsProvider.EMPTY;
@@ -116,7 +115,7 @@ public final class DialogsCommand extends RootCommand {
                     final Player target = arguments.next(Player.class).asRequired(DIALOGS_SEND_USAGE);
                     final String dialogIdentifier = arguments.next(String.class).asRequired(DIALOGS_SEND_USAGE);
                     // Getting dialog from specified identifier.
-                    final @Nullable Dialog dialog = PluginDialogs.DIALOGS.get(dialogIdentifier);
+                    final @Nullable Dialog dialog = plugin.getDialogsLoader().getDialogs().get(dialogIdentifier);
                     // Sending error message in case dialog with specified identifier was not found.
                     if (dialog == null || dialog.isEmpty() == true) {
                         Message.of(PluginLocale.COMMAND_DIALOGS_SEND_FAILURE_NOT_FOUND).placeholder("input", dialogIdentifier).send(sender);

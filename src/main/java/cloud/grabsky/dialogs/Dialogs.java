@@ -30,9 +30,9 @@ import cloud.grabsky.configuration.ConfigurationMapper;
 import cloud.grabsky.configuration.exception.ConfigurationMappingException;
 import cloud.grabsky.configuration.paper.PaperConfigurationMapper;
 import cloud.grabsky.dialogs.command.DialogsCommand;
-import cloud.grabsky.dialogs.configuration.PluginDialogs;
 import cloud.grabsky.dialogs.configuration.PluginLocale;
 import cloud.grabsky.dialogs.configuration.adapter.DialogElementAdapter;
+import cloud.grabsky.dialogs.loader.DialogsLoader;
 import org.bukkit.event.Listener;
 
 import java.io.File;
@@ -51,6 +51,9 @@ public final class Dialogs extends BedrockPlugin implements Listener {
     @Getter(AccessLevel.PUBLIC)
     private static boolean isPlaceholderAPI;
 
+    @Getter(AccessLevel.PUBLIC)
+    private DialogsLoader dialogsLoader;
+
     private ConfigurationMapper mapper;
 
     @Override
@@ -64,6 +67,8 @@ public final class Dialogs extends BedrockPlugin implements Listener {
             // Mark PlaceholderAPI as present
             isPlaceholderAPI = true;
         } catch (final ClassNotFoundException ___) { /* IGNORE */ }
+        // ...
+        this.dialogsLoader = new DialogsLoader(this);
         // ...
         this.mapper = PaperConfigurationMapper.create(moshi -> moshi.add(DialogElement.class, DialogElementAdapter.INSTANCE));
         // ...
@@ -90,17 +95,16 @@ public final class Dialogs extends BedrockPlugin implements Listener {
     @Override
     public boolean onReload() throws ConfigurationMappingException, IllegalStateException {
         try {
+            // Reloading configuration...
             final File locale = ensureResourceExistence(this, new File(this.getDataFolder(), "locale.json"));
             final File localeCommands = ensureResourceExistence(this, new File(this.getDataFolder(), "locale_commands.json"));
-            final File dialogs = ensureResourceExistence(this, new File(this.getDataFolder(), "dialogs.json"));
             // Reloading configuration files.
             mapper.map(
                     ConfigurationHolder.of(PluginLocale.class, locale),
-                    ConfigurationHolder.of(PluginLocale.Commands.class, localeCommands),
-                    ConfigurationHolder.of(PluginDialogs.class, dialogs)
+                    ConfigurationHolder.of(PluginLocale.Commands.class, localeCommands)
             );
-            // Returning 'true' as reload finished without any exceptions.
-            return true;
+            // Returning the result of DialogsLoader#load method as to know whether plugin has reloaded sucessfully or not.
+            return this.dialogsLoader.load();
         } catch (final IOException e) {
             e.printStackTrace();
             return false;

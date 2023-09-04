@@ -21,8 +21,8 @@ Requires **Java 17** (or higher) and **Paper 1.20.1 #161** (or higher).
 
 ## Future
 List of things that **may** be implemented in the future:
+- [x] Replace `dialogs.json` file with `plugins/Dialogs/dialogs/` directory which can contain multiple files defining dialogs. This allows to form groups/categories of dialogs which will drastically improve readability/edit times for servers with lots of them. This may involve some breaking configuration changes.
 - [ ] Refactor `ConsoleCommandElement` to `CommandElement` with support for console and player commands in mind. This may involve some breaking configuration changes.
-- [ ] Replace `dialogs.json` file with `plugins/Dialogs/dialogs/` directory which can contain multiple files defining dialogs. This allows to form groups/categories of dialogs which will drastically improve readability/edit times for servers with lots of them. This may involve some breaking configuration changes.
 - [ ] More elements, including but not limited to titles, subtitles and perhaps toast pop-ups.
 
 <br />

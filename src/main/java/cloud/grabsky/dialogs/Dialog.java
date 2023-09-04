@@ -31,10 +31,12 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.UUID;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -46,10 +48,15 @@ public final class Dialog implements Collection<DialogElement> {
 
     private static final Dialogs plugin = Dialogs.getInstance();
 
+    private static final String LAST_DIALOG_KEY = "last_dialog";
+
     @Delegate @Getter(AccessLevel.PUBLIC)
     private final Collection<DialogElement> elements;
 
     public void trigger(final @NotNull Player target) {
+        final String dialogId = UUID.randomUUID().toString();
+        // Updating dialog.
+        target.setMetadata("last_dialog", new FixedMetadataValue(plugin, dialogId));
         // Used to calculate when next queued task should be started.
         long nextTaskStartsIn = 0;
         // Iterating over all elements in this Dialog and scheduling to display them.
@@ -62,6 +69,9 @@ public final class Dialog implements Collection<DialogElement> {
                 plugin.getBedrockScheduler().repeatAsync(nextTaskStartsIn, animatedText.refreshRate(), element.ticksToWait() / animatedText.refreshRate(), (iteration) -> {
                     // Cancelling task in case Player connection has been reset.
                     if (target.isConnected() == false)
+                        return false;
+                    // Cancelling task in case other one has been started in the meanwhile.
+                    if (target.getMetadata(LAST_DIALOG_KEY).isEmpty() == false && target.getMetadata(LAST_DIALOG_KEY).get(0).asString().equalsIgnoreCase(dialogId) == false)
                         return false;
                     // Preparing the message Component.
                     final Component component = (frames.hasNext() == true)
@@ -92,6 +102,9 @@ public final class Dialog implements Collection<DialogElement> {
                     // Skipping task execution in case Player connection has been reset.
                     if (target.isConnected() == false)
                         return;
+                    // Cancelling task in case other one has been started in the meanwhile.
+                    if (target.getMetadata(LAST_DIALOG_KEY).isEmpty() == false && target.getMetadata(LAST_DIALOG_KEY).get(0).asString().equalsIgnoreCase(dialogId) == false)
+                        return;
                     // Getting the message channel.
                     final TextElement.Channel channel = textElement.channel();
                     // Sending message based on channel type.
@@ -110,6 +123,9 @@ public final class Dialog implements Collection<DialogElement> {
                 plugin.getBedrockScheduler().run(nextTaskStartsIn, (task) -> {
                     // Skipping task execution in case Player connection has been reset.
                     if (target.isConnected() == false)
+                        return;
+                    // Cancelling task in case other one has been started in the meanwhile.
+                    if (target.getMetadata(LAST_DIALOG_KEY).isEmpty() == false && target.getMetadata(LAST_DIALOG_KEY).get(0).asString().equalsIgnoreCase(dialogId) == false)
                         return;
                     // Preparing command string.
                     final String command = (Dialogs.isPlaceholderAPI() == true) ? PlaceholderAPI.setPlaceholders(target, consoleCommand.value()) : consoleCommand.value();

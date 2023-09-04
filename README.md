@@ -24,13 +24,12 @@ List of things that **may** be implemented in the future:
 - [ ] Refactor `ConsoleCommandElement` to `CommandElement` with support for console and player commands in mind. This may involve some breaking configuration changes.
 - [ ] Replace `dialogs.json` file with `plugins/Dialogs/dialogs/` directory which can contain multiple files defining dialogs. This allows to form groups/categories of dialogs which will drastically improve readability/edit times for servers with lots of them. This may involve some breaking configuration changes.
 - [ ] More elements, including but not limited to titles, subtitles and perhaps toast pop-ups.
-- [ ] Cancel current dialog when new one is displayed.
 
 <br />
 
 ## Known Issues
 List of known issues that will be fixed in the upcoming plugin release(s):
-- [ ] Multiple dialogs can be shown to player at once, causing them to overlap.
+- [x] ~~Multiple dialogs can be shown to player at once, causing them to overlap.~~ (**[1.20.1 #9](https://github.com/Grabsky/Dialogs/releases/tag/1.20.1-9)**)
 
 <br />
 

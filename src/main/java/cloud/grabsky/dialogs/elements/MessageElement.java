@@ -101,6 +101,7 @@ public final class MessageElement implements DialogElement {
             // Creating and returning element.
             return new MessageElement(type, audience, value, ticks_to_wait_before_continuing);
         }
+
     }
 
 }

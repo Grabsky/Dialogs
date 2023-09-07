@@ -173,6 +173,7 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
             // Creating and returning element.
             return new AnimatedActionBarElement(audience, value, refresh_rate, min_letters_per_frame, max_letters_per_frame, lock_until_next_element, ticks_to_wait_before_continuing);
         }
+
     }
 
 }

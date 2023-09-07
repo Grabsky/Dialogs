@@ -24,12 +24,15 @@
 package cloud.grabsky.dialogs;
 
 import cloud.grabsky.bedrock.components.Message;
-import cloud.grabsky.dialogs.elements.AnimatedTextElement;
-import cloud.grabsky.dialogs.elements.ConsoleCommandElement;
-import cloud.grabsky.dialogs.elements.TextElement;
+import cloud.grabsky.dialogs.elements.AnimatedActionBarElement;
+import cloud.grabsky.dialogs.elements.CommandElement;
+import cloud.grabsky.dialogs.elements.MessageElement;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
@@ -54,89 +57,92 @@ public final class Dialog implements Collection<DialogElement> {
     private final Collection<DialogElement> elements;
 
     public void trigger(final @NotNull Player target) {
-        final String dialogId = UUID.randomUUID().toString();
+        final String dialogIdentifier = UUID.randomUUID().toString();
         // Updating dialog.
-        target.setMetadata("last_dialog", new FixedMetadataValue(plugin, dialogId));
+        target.setMetadata(LAST_DIALOG_KEY, new FixedMetadataValue(plugin, dialogIdentifier));
         // Used to calculate when next queued task should be started.
         long nextTaskStartsIn = 0;
         // Iterating over all elements in this Dialog and scheduling to display them.
         for (final DialogElement element : elements) {
 
-            if (element instanceof AnimatedTextElement animatedText) {
-                final AnimatedTextElement.Channel channel = animatedText.channel();
-                final Iterator<Component> frames = animatedText.frames().iterator();
+            if (element instanceof AnimatedActionBarElement animatedActionBar) {
+                final Iterator<Component> frames = animatedActionBar.frames().iterator();
                 // Scheduling a new asynchrnous repeat task.
-                plugin.getBedrockScheduler().repeatAsync(nextTaskStartsIn, animatedText.refreshRate(), element.ticksToWait() / animatedText.refreshRate(), (iteration) -> {
-                    // Cancelling task in case Player connection has been reset.
-                    if (target.isConnected() == false)
-                        return false;
-                    // Cancelling task in case other one has been started in the meanwhile.
-                    if (target.getMetadata(LAST_DIALOG_KEY).isEmpty() == false && target.getMetadata(LAST_DIALOG_KEY).get(0).asString().equalsIgnoreCase(dialogId) == false)
+                plugin.getBedrockScheduler().repeatAsync(nextTaskStartsIn, animatedActionBar.refreshRate(), element.ticksToWait() / animatedActionBar.refreshRate(), (iteration) -> {
+                    // Cancelling task in case Player connection has been reset OR other dialog has been started in the meanwhile.
+                    if (isDialogStillValid(target, dialogIdentifier) == false)
                         return false;
                     // Preparing the message Component.
                     final Component component = (frames.hasNext() == true)
                             ? frames.next()
-                                    : (animatedText.lockUntilNextElement() == true)
-                                    ? animatedText.lastFrame()
-                            : null;
+                            : (animatedActionBar.lockUntilNextElement() == true)
+                                    ? animatedActionBar.lastFrame()
+                                    : null;
                     // Currently only action bar messages can be "animated".
-                    switch (channel) {
-                        case ACTIONBAR -> Message.of(component).sendActionBar(target);
-                    }
+                    Message.of(component).sendActionBar(target);
+                    // Playing the animation sound.
                     if (frames.hasNext() == true)
                         target.playSound(target, Sound.BLOCK_NOTE_BLOCK_HAT, 1.0F, 0.1F);
                     // Continuing... Should be cancelled automatically when max iterations is reached.
                     return true;
                 });
                 // Calculating "start" time of the next element. Additionally, refresh rate value is added as to prevent elements from overlapping.
-                nextTaskStartsIn += element.ticksToWait() + animatedText.refreshRate();
+                nextTaskStartsIn += element.ticksToWait() + animatedActionBar.refreshRate();
             }
 
-            else if (element instanceof TextElement textElement) {
+            else if (element instanceof MessageElement messageElement) {
                 // Parsing the message, setting placeholders if supported.
                 final Message.StringMessage message = (Dialogs.isPlaceholderAPI() == true)
-                        ? Message.of(PlaceholderAPI.setPlaceholders(target, textElement.value()))
-                        : Message.of(textElement.value());
+                        ? Message.of(PlaceholderAPI.setPlaceholders(target, messageElement.value()))
+                        : Message.of(messageElement.value());
                 // Scheduling a new asynchrnous run task.
                 plugin.getBedrockScheduler().runAsync(nextTaskStartsIn, (task) -> {
-                    // Skipping task execution in case Player connection has been reset.
-                    if (target.isConnected() == false)
+                    // Cancelling task in case Player connection has been reset OR other dialog has been started in the meanwhile.
+                    if (isDialogStillValid(target, dialogIdentifier) == false)
                         return;
-                    // Cancelling task in case other one has been started in the meanwhile.
-                    if (target.getMetadata(LAST_DIALOG_KEY).isEmpty() == false && target.getMetadata(LAST_DIALOG_KEY).get(0).asString().equalsIgnoreCase(dialogId) == false)
-                        return;
-                    // Getting the message channel.
-                    final TextElement.Channel channel = textElement.channel();
-                    // Sending message based on channel type.
-                    switch (channel) {
-                        case CHAT_MESSAGE -> message.send(target);
-                        case CHAT_BROADCAST -> message.broadcast();
-                        case ACTIONBAR -> message.sendActionBar(target);
+                    // Getting the message audience type.
+                    final MessageElement.AudienceType audience = messageElement.audience();
+                    // Getting the actual audience.
+                    final Audience actualAudience = switch (audience) {
+                        case PLAYER -> target;
+                        case CONSOLE -> Bukkit.getConsoleSender();
+                        case SERVER -> Bukkit.getServer();
+                    };
+                    // Getting the message type.
+                    final MessageElement.Type type = messageElement.type();
+                    // Sending message based in specific type.
+                    switch (type) {
+                        case CHAT_MESSAGE -> message.send(actualAudience);
+                        case ACTIONBAR_MESSAGE -> message.sendActionBar(actualAudience);
                     }
                 });
                 // Calculating "start" time of the next element.
                 nextTaskStartsIn += element.ticksToWait();
             }
 
-            else if (element instanceof ConsoleCommandElement consoleCommand) {
+            else if (element instanceof CommandElement commandElement) {
                 // Scheduling a new run task. Command dispatch have to be called on the main thread.
                 plugin.getBedrockScheduler().run(nextTaskStartsIn, (task) -> {
-                    // Skipping task execution in case Player connection has been reset.
-                    if (target.isConnected() == false)
-                        return;
-                    // Cancelling task in case other one has been started in the meanwhile.
-                    if (target.getMetadata(LAST_DIALOG_KEY).isEmpty() == false && target.getMetadata(LAST_DIALOG_KEY).get(0).asString().equalsIgnoreCase(dialogId) == false)
+                    // Cancelling task in case Player connection has been reset OR other dialog has been started in the meanwhile.
+                    if (isDialogStillValid(target, dialogIdentifier) == false)
                         return;
                     // Preparing command string.
-                    final String command = (Dialogs.isPlaceholderAPI() == true) ? PlaceholderAPI.setPlaceholders(target, consoleCommand.value()) : consoleCommand.value();
+                    final String command = (Dialogs.isPlaceholderAPI() == true) ? PlaceholderAPI.setPlaceholders(target, commandElement.value()) : commandElement.value();
+                    // Getting the command sender.
+                    final CommandSender sender = (commandElement.type() == CommandElement.Type.PLAYER_COMMAND) ? target : plugin.getServer().getConsoleSender();
                     // Dispatching the command.
-                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command);
+                    plugin.getServer().dispatchCommand(sender, command);
                 });
                 // Calculating "start" time of the next element.
                 nextTaskStartsIn += element.ticksToWait();
             }
 
         }
+    }
+
+    // Returns false in case Player connection has been reset OR other dialog has been started in the meanwhile.
+    private static boolean isDialogStillValid(final @NotNull Player target, final @NotNull String dialogIdentifier) {
+        return target.isConnected() == true && (target.getMetadata(LAST_DIALOG_KEY).isEmpty() == true || target.getMetadata(LAST_DIALOG_KEY).get(0).asString().equalsIgnoreCase(dialogIdentifier) == true);
     }
 
 }

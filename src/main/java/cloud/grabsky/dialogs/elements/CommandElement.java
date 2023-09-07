@@ -25,8 +25,7 @@ package cloud.grabsky.dialogs.elements;
 
 import cloud.grabsky.configuration.util.LazyInit;
 import cloud.grabsky.dialogs.DialogElement;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -37,72 +36,53 @@ import lombok.experimental.Accessors;
 
 @Accessors(fluent = true)
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
-public final class TextElement implements DialogElement {
+public class CommandElement implements DialogElement {
 
     /**
-     * Channel to use when forwarding this instance of {@link AnimatedTextElement}.
+     * Type to use when forwarding this instance of {@link CommandElement}.
      */
     @Getter(AccessLevel.PUBLIC)
-    private final TextElement.Channel channel;
+    private final CommandElement.Type type;
 
     /**
-     * Dialog {@link String} encoded using {@link MiniMessage} serializer.
+     * Command {@link String} to be executed.
      */
     @Getter(AccessLevel.PUBLIC)
     private final String value;
 
-    /**
-     * Pause to wait after displaying this {@link TextElement}. Measured in {@code ticks}.
-     */
     @Getter(AccessLevel.PUBLIC)
     private final int ticksToWait;
 
-
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    public enum Channel {
-
-        CHAT_MESSAGE("text/chat_message"),
-        CHAT_BROADCAST("text/chat_broadcast"),
-        ACTIONBAR("text/actionbar");
-
-        private static final Channel[] VALUES = Channel.values();
-
-        private final String identifier;
-
-        public static @NotNull Channel fromIdentifier(final @NotNull String identifier) throws IllegalArgumentException {
-            // Returning first matching enum.
-            for (final Channel channel : VALUES)
-                if (channel.identifier.equalsIgnoreCase(identifier) == true)
-                    return channel;
-            // Returning null in case nothing has been found.
-            throw new IllegalArgumentException(identifier);
-        }
-
+    /**
+     * Defines type (executor) of this command.
+     */
+    // NOTE: Split into two separate types as to not introduce required property that defines command executor. Optional property with default value does not make much sense in that case.
+    public enum Type {
+        PLAYER_COMMAND, CONSOLE_COMMAND;
     }
 
 
-    @ApiStatus.Internal
-    // NOTE: Field names does not follow Java Naming Convention to provide 1:1 mapping with JSON keys.
+    @Internal
     @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
-    public static final class Init implements LazyInit<TextElement> {
+    // NOTE: Field names does not follow Java Naming Convention to provide 1:1 mapping with JSON keys.
+    public static final class Init implements LazyInit<CommandElement> {
 
         // Not an actual JSON field, filled by JsonAdapter based on context.
-        private final @NotNull TextElement.Channel channel;
+        private final @NotNull CommandElement.Type type;
 
         // Nullability cannot be determined because it depends entirely on the end-user.
         public @UnknownNullability String value;
-
-        // Following field(s) have defaults and can be omitted or definhed as null by the end-user.
         public @NotNull Integer ticks_to_wait_before_continuing = 1;
 
         @Override
-        public @NotNull TextElement init() throws IllegalStateException {
+        public @NotNull CommandElement init() throws IllegalStateException {
             // Throwing an error in case "value" field is invalid.
             if (value == null)
                 throw new IllegalStateException("Field \"value\" is required but is either null or has not been found.");
             // Creating and returning element.
-            return new TextElement(channel, value, ticks_to_wait_before_continuing);
+            return new CommandElement(type, value, ticks_to_wait_before_continuing);
         }
+
     }
 
 }

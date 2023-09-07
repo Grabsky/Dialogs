@@ -1,14 +1,16 @@
 {
     // Dialogs can be used to compose basic, single-element messages.
     "simple_example": {
-        // Elements array. Supported element types are: [animated_text/actionbar, text/chat_message, text/broadcast_message, console_command]
+        // Elements array. Supported element types are: [actionbar_animation, chat_message, actionbar_message, player_command, console_command]
         "elements": [
             {
-                "type": "text/chat_message",
+                "type": "chat_message",
+                // Optional audience to forward this message to. Can be either "player", "server" or "console". (DEFAULT = "player")
+                "audience": "player",
                 // Text to be displayed. Supports PlaceholderAPI and mutliple lines.
                 "value": [
                     " Welcome, <gold>%player_name%<white> to the server.",
-                    " <r>",
+                    " ",
                     " Type <gold>/help<white> for a list of commands."
                 ]
             }
@@ -16,11 +18,13 @@
     },
     // Other example of single-element dialog.
     "broadcast_example": {
-        // Elements array. Supported element types are: [animated_text/actionbar, text/chat_message, text/broadcast_message, console_command]
+        // Elements array. Supported element types are: [actionbar_animation, chat_message, actionbar_message, player_command, console_command]
         "elements": [
             // Chat broadcast element sends the message to everyone.
             {
-                "type": "text/chat_broadcast",
+                "type": "chat_message",
+                // Optional audience to forward this message to. Can be either "player", "server" or "console". (DEFAULT = "player")
+                "audience": "server",
                 // Text to be displayed. Supports PlaceholderAPI and mutliple lines.
                 "value": "<gold>%player_name%<white> has joined the server for the first time."
             }
@@ -28,11 +32,11 @@
     },
     // Dialogs can also be used to compose complex chains of multi-type elements.
     "complex_example": {
-        // Elements array. Supported element types are: [animated_text/actionbar, text/chat_message, text/broadcast_message, console_command]
+        // Elements array. Supported element types are: [actionbar_animation, chat_message, actionbar_message, player_command, console_command]
         "elements": [
             // Animated element showcasing all possible properties that can be configured.
             {
-                "type": "animated_text/actionbar",
+                "type": "actionbar_animation",
                 // Text to be displayed. Frames are generated automatically.
                 "value": "<gold>Somebody<dark_gray>: <white>Welcome to the city, stranger...",
                 // Optional refresh rate measured in ticks. (DEFAULT = 2)
@@ -48,7 +52,7 @@
             },
             // Similar as above, but now with default properties.
             {
-                "type": "animated_text/actionbar",
+                "type": "actionbar_animation",
                 // Text to be displayed. Frames are generated automatically.
                 "value": "<gold>Somebody<dark_gray>: <white>Here, take this... may come in handy...",
                 // Ticks to wait before continuing to the next element in the queue. Can be omitted for non-animated elements.
@@ -62,7 +66,7 @@
             },
             // Chat message element sends message to the player.
             {
-                "type": "text/chat_message",
+                "type": "chat_message",
                 // Text to be displayed. Supports PlaceholderAPI and mutliple lines.
                 "value": "<gold><italic>Stranger<gray> gave <gold>%player_name%<gray> an old, rusty <white>Iron Sword<gray>..."
             }

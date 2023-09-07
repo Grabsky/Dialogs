@@ -25,14 +25,16 @@ package cloud.grabsky.dialogs.configuration.adapter;
 
 import cloud.grabsky.configuration.paper.adapter.StringComponentAdapter;
 import cloud.grabsky.dialogs.DialogElement;
-import cloud.grabsky.dialogs.elements.AnimatedTextElement;
-import cloud.grabsky.dialogs.elements.ConsoleCommandElement;
-import cloud.grabsky.dialogs.elements.TextElement;
+import cloud.grabsky.dialogs.elements.AnimatedActionBarElement;
+import cloud.grabsky.dialogs.elements.CommandElement;
+import cloud.grabsky.dialogs.elements.MessageElement;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonReader.Token;
 import com.squareup.moshi.JsonWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import util.Enums;
 
 import java.io.IOException;
 
@@ -51,21 +53,15 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
         final String type = (in.nextName().equals("type") == true) ? in.nextString().toLowerCase() : "";
         // Doing stuff based on the type.
         return switch (type) {
-            case "text/chat_message", "text/chat_broadcast", "text/actionbar" -> {
-                final TextElement.Init init = new TextElement.Init(TextElement.Channel.fromIdentifier(type));
+            case "chat_message", "actionbar_message" -> {
+                final MessageElement.Init init = new MessageElement.Init(Enums.fromName(MessageElement.Type.class, type));
                 // ...
                 while (in.hasNext() == true) {
                     final String name = in.nextName().toLowerCase();
                     // ...
                     switch (name) {
-                        case "value" -> {
-                            switch (type) {
-                                // StringComponentAdapter supports single-value strings and arrays by joining entries with <newline> delimer.
-                                case "text/chat_message", "text/chat_broadcast" -> init.value = StringComponentAdapter.INSTANCE.fromJson(in);
-                                // Non-chat messages are single-line only.
-                                default -> init.value = in.nextString();
-                            }
-                        }
+                        case "audience" -> init.audience = Enums.fromName(MessageElement.AudienceType.class, in.nextString());
+                        case "value" -> init.value = (in.peek() == Token.BEGIN_ARRAY) ? StringComponentAdapter.INSTANCE.fromJson(in) : in.nextString();
                         case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
                     }
                 }
@@ -74,13 +70,14 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
                 // Initializing and returning the value.
                 yield init.init();
             }
-            case "animated_text/actionbar" -> {
-                final AnimatedTextElement.Init init = new AnimatedTextElement.Init(AnimatedTextElement.Channel.fromIdentifier(type));
+            case "actionbar_animation" -> {
+                final AnimatedActionBarElement.Init init = new AnimatedActionBarElement.Init();
                 // ...
                 while (in.hasNext() == true) {
                     final String name = in.nextName().toLowerCase();
                     // ...
                     switch (name) {
+                        case "audience" -> init.audience = Enums.fromName(AnimatedActionBarElement.AudienceType.class, in.nextString());
                         case "value" -> init.value = in.nextString();
                         case "refresh_rate" -> init.refresh_rate = in.nextLong();
                         case "min_letters_per_frame" -> init.min_letters_per_frame = in.nextInt();
@@ -94,8 +91,8 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
                 // Initializing and returning the value.
                 yield init.init();
             }
-            case "console_command" -> {
-                final ConsoleCommandElement.Init init = new ConsoleCommandElement.Init();
+            case "player_command", "console_command" -> {
+                final CommandElement.Init init = new CommandElement.Init(Enums.fromName(CommandElement.Type.class, type));
                 // ...
                 while (in.hasNext() == true) {
                     final String name = in.nextName().toLowerCase();

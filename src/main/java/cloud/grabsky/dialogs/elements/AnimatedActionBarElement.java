@@ -43,12 +43,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 
 @Accessors(fluent = true)
-public final class AnimatedTextElement implements DialogElement {
+public final class AnimatedActionBarElement implements DialogElement.Animated {
 
     private static final Pattern TAG_PATTERN = Pattern.compile("(?=<)|(?<=>)");
 
-    public AnimatedTextElement(
-            final @NotNull AnimatedTextElement.Channel channel,
+    public AnimatedActionBarElement(
+            final @NotNull AudienceType audience,
             final @NotNull String value,
             final long refreshRate,
             final int minLettersPerFrame,
@@ -56,7 +56,7 @@ public final class AnimatedTextElement implements DialogElement {
             final boolean lockUntilNextElement,
             final int ticksToWait
     ) {
-        this.channel = channel;
+        this.audience = audience;
         this.value = value;
         this.refreshRate = refreshRate;
         this.minLettersPerFrame = minLettersPerFrame;
@@ -102,10 +102,10 @@ public final class AnimatedTextElement implements DialogElement {
     }
 
     /**
-     * Channel to use when forwarding this instance of {@link AnimatedTextElement}.
+     * Audience to forward this message to.
      */
     @Getter(AccessLevel.PUBLIC)
-    private final @NotNull AnimatedTextElement.Channel channel;
+    private final transient AudienceType audience;
 
     /**
      * Dialog {@link String} encoded using {@link MiniMessage} serializer.
@@ -113,84 +113,42 @@ public final class AnimatedTextElement implements DialogElement {
     @Getter(AccessLevel.PUBLIC)
     private final @NotNull String value;
 
-    /**
-     * Animation refresh rate. Measured in {@code ticks}.
-     */
+    /* AnimatedDialogElement */
+
     @Getter(AccessLevel.PUBLIC)
     private final long refreshRate;
 
-    /**
-     * Minimum number of letters per frame.
-     */
     @Getter(AccessLevel.PUBLIC)
     private final int minLettersPerFrame;
 
-    /**
-     * Minimum number of letters per frame.
-     */
     @Getter(AccessLevel.PUBLIC)
     private final int maxLettersPerFrame;
 
-    /**
-     * Returns {@code true} if this instance of {@link AnimatedTextElement} should lock on last frame while waiting for the next dialog.
-     */
     @Getter(AccessLevel.PUBLIC)
     private final boolean lockUntilNextElement;
 
-    /**
-     * Pause to wait after displaying this {@link AnimatedTextElement}. Measured in {@code ticks}.
-     */
-    @Getter(AccessLevel.PUBLIC)
-    private final int ticksToWait;
-
-    /**
-     * List of all {@link Component} frames generated for this {@link AnimatedTextElement} instance.
-     */
     @Getter(AccessLevel.PUBLIC)
     private transient final List<Component> frames;
 
-    /**
-     * Returns first {@link Component} frame of this {@link AnimatedTextElement}.
-     */
-    public Component firstFrame() {
-        return frames.get(0);
-    }
+    @Getter(AccessLevel.PUBLIC)
+    private final int ticksToWait;
+
 
     /**
-     * Returns last {@link Component} frame of this {@link AnimatedTextElement}.
+     * Defines support audience types to forward the {@link AnimatedActionBarElement} to.
      */
-    public Component lastFrame() {
-        return frames.get(frames.size() - 1);
+    public enum AudienceType {
+        PLAYER, SERVER;
     }
 
 
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    public enum Channel {
-
-        ACTIONBAR("animated_text/actionbar");
-
-        private static final Channel[] VALUES = Channel.values();
-
-        private final String identifier;
-
-        public static @NotNull Channel fromIdentifier(final @NotNull String identifier) throws IllegalArgumentException {
-            // Returning first matching enum.
-            for (final Channel channel : VALUES)
-                if (channel.identifier.equalsIgnoreCase(identifier) == true)
-                    return channel;
-            // Returning null in case nothing has been found.
-            throw new IllegalArgumentException(identifier);
-        }
-
-    }
-
-
-    @Internal // NOTE: Field names does not follow Java Naming Convention to provide 1:1 mapping with JSON keys.
+    @Internal
     @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
-    public static final class Init implements LazyInit<AnimatedTextElement> {
+    // NOTE: Field names does not follow Java Naming Convention to provide 1:1 mapping with JSON keys.
+    public static final class Init implements LazyInit<AnimatedActionBarElement> {
 
-        // Not an actual JSON field, filled by JsonAdapter based on context.
-        private final @NotNull AnimatedTextElement.Channel channel;
+        // Following field(s) have defaults and can be omitted or definhed as null by the end-user.
+        public @NotNull AudienceType audience = AudienceType.PLAYER;
 
         // Nullability cannot be determined because it depends entirely on the end-user.
         public @UnknownNullability String value;
@@ -205,7 +163,7 @@ public final class AnimatedTextElement implements DialogElement {
         public @UnknownNullability Integer ticks_to_wait_before_continuing;
 
         @Override
-        public @NotNull AnimatedTextElement init() throws IllegalStateException {
+        public @NotNull AnimatedActionBarElement init() throws IllegalStateException {
             // Throwing an error in case "value" field is invalid.
             if (value == null)
                 throw new IllegalStateException("Field \"value\" is required but is either null or has not been found.");
@@ -213,7 +171,7 @@ public final class AnimatedTextElement implements DialogElement {
             if (ticks_to_wait_before_continuing == null)
                 throw new IllegalStateException("Field \"ticks_to_wait_before_continuing\" is required but is either null or has not been found.");
             // Creating and returning element.
-            return new AnimatedTextElement(channel, value, refresh_rate, min_letters_per_frame, max_letters_per_frame, lock_until_next_element, ticks_to_wait_before_continuing);
+            return new AnimatedActionBarElement(audience, value, refresh_rate, min_letters_per_frame, max_letters_per_frame, lock_until_next_element, ticks_to_wait_before_continuing);
         }
     }
 

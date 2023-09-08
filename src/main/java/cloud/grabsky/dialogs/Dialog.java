@@ -27,6 +27,7 @@ import cloud.grabsky.bedrock.components.Message;
 import cloud.grabsky.dialogs.elements.AnimatedActionBarElement;
 import cloud.grabsky.dialogs.elements.CommandElement;
 import cloud.grabsky.dialogs.elements.MessageElement;
+import cloud.grabsky.dialogs.elements.PauseElement;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -133,6 +134,11 @@ public final class Dialog implements Collection<DialogElement> {
                     // Dispatching the command.
                     plugin.getServer().dispatchCommand(sender, command);
                 });
+                // Calculating "start" time of the next element.
+                nextTaskStartsIn += element.ticksToWait();
+            }
+
+            else if (element instanceof PauseElement pauseElement) {
                 // Calculating "start" time of the next element.
                 nextTaskStartsIn += element.ticksToWait();
             }

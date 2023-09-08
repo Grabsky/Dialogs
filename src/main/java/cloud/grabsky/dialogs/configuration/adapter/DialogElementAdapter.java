@@ -28,6 +28,7 @@ import cloud.grabsky.dialogs.DialogElement;
 import cloud.grabsky.dialogs.elements.AnimatedActionBarElement;
 import cloud.grabsky.dialogs.elements.CommandElement;
 import cloud.grabsky.dialogs.elements.MessageElement;
+import cloud.grabsky.dialogs.elements.PauseElement;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.JsonReader.Token;
@@ -99,6 +100,21 @@ public final class DialogElementAdapter extends JsonAdapter<DialogElement> {
                     // ...
                     switch (name) {
                         case "value" -> init.value = in.nextString();
+                        case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
+                    }
+                }
+                // Ending the JSON object.
+                in.endObject();
+                // Initializing and returning the value.
+                yield init.init();
+            }
+            case "pause" -> {
+                final PauseElement.Init init = new PauseElement.Init();
+                // ...
+                while (in.hasNext() == true) {
+                    final String name = in.nextName().toLowerCase();
+                    // ...
+                    switch (name) {
                         case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
                     }
                 }

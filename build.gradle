@@ -1,6 +1,6 @@
 plugins {
     id("java-library")
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id 'net.minecrell.plugin-yml.paper' version '0.6.0'
 }
 
 // See "deploy" task registered below as to find out why it's here.
@@ -25,15 +25,15 @@ dependencies {
     // Paper API
     compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
     // Libraries
-    implementation("cloud.grabsky:bedrock:1.20.1-44")
-    implementation("cloud.grabsky:commands:1.20.1-34")
-    implementation("cloud.grabsky:configuration-paper:1.20.1-42")
+    paperLibrary("cloud.grabsky:bedrock:1.20.1-44")
+    paperLibrary("cloud.grabsky:commands:1.20.1-34")
+    paperLibrary("cloud.grabsky:configuration-paper:1.20.1-42")
     // PlaceholderAPI
     compileOnly("me.clip:placeholderapi:2.11.3")
 }
 
 tasks {
-    shadowJar {
+    jar {
         archiveFileName = "${rootProject.name}-${project.version}.jar"
     }
     compileJava {
@@ -42,23 +42,28 @@ tasks {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    processResources {
-        filesMatching("paper-plugin.yml") {
-            expand(name: rootProject.name, version: rootProject.version)
-        }
-    }
 }
 
 // Copies produced .jar to $JVM_BUILDS and $PLUGINS_DIR directories specfied as environment variables.
 // This is solely for debugging/development purposes and does nothing when said variables are not set.
 tasks.register("deploy") {
-    dependsOn(shadowJar)
+    dependsOn(jar)
     doLast {
         // Copying to the builds directory specified by 'JVM_BUILDS' environment variable.
         if (buildsDirectory != null)
-            copy { from(shadowJar) into(buildsDirectory) }
+            copy { from(jar) into(buildsDirectory) }
         // Copying to the plugins directory specified by 'PLUGINS_DIR' environment variable.
         if (pluginsDirectory != null)
-            copy { from(shadowJar) into(pluginsDirectory) }
+            copy { from(jar) into(pluginsDirectory) }
+    }
+}
+
+paper {
+    main = "cloud.grabsky.dialogs.Dialogs"
+    loader = "cloud.grabsky.dialogs.Dialogs\$PluginLoader"
+    apiVersion = "1.20"
+    generateLibrariesJson = true
+    serverDependencies {
+        "PlaceholderAPI" { load = "BEFORE"; required = false }
     }
 }

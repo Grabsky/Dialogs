@@ -40,7 +40,7 @@ $ git clone https://github.com/Grabsky/Dialogs.git
 # Entering cloned repository
 $ cd ./Dialogs
 # Compiling
-$ ./gradlew clean shadowJar
+$ ./gradlew clean assemble
 ```
 
 <br />

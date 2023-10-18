@@ -35,7 +35,7 @@ import com.squareup.moshi.JsonReader.Token;
 import com.squareup.moshi.JsonWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import util.Enums;
+import cloud.grabsky.dialogs.util.Enums;
 
 import java.io.IOException;
 

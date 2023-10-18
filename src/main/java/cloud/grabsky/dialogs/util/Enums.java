@@ -1,4 +1,4 @@
-package util;
+package cloud.grabsky.dialogs.util;
 
 import org.jetbrains.annotations.NotNull;
 

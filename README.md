@@ -24,6 +24,7 @@ List of things that **may** be implemented in the future:
 - [x] Replace `dialogs.json` file with `plugins/Dialogs/dialogs/` directory which can contain multiple files defining dialogs. This allows to form groups/categories of dialogs which will drastically improve readability/edit times for servers with lots of them. This may involve some breaking configuration changes.
 - [x] Refactor `ConsoleCommandElement` to `CommandElement` with support for console and player commands in mind. This may involve some breaking configuration changes.
 - [ ] More elements, including but not limited to: bossbar, titles, subtitles and perhaps toast pop-ups.
+- [ ] Configurable typing sound and a way to disable it.
 
 <br />
 
@@ -34,13 +35,15 @@ List of known issues that will be fixed in the upcoming plugin release(s):
 <br />
 
 ## Building (Linux)
+Some dependencies use [GitHub Gradle Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry) and thus may require extra configuration steps for the project to build properly.
+
 ```shell
-# Cloning repository
+# Cloning repository.
 $ git clone https://github.com/Grabsky/Dialogs.git
-# Entering cloned repository
+# Entering cloned repository.
 $ cd ./Dialogs
-# Compiling
-$ ./gradlew clean assemble
+# Compiling and building artifacts.
+$ ./gradlew clean build
 ```
 
 <br />

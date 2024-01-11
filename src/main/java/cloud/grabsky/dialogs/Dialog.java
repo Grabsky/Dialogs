@@ -68,7 +68,7 @@ public final class Dialog implements Collection<DialogElement> {
 
             if (element instanceof AnimatedActionBarElement animatedActionBar) {
                 final Iterator<Component> frames = animatedActionBar.frames().iterator();
-                // Scheduling a new asynchrnous repeat task.
+                // Scheduling a new asynchronous repeat task.
                 plugin.getBedrockScheduler().repeatAsync(nextTaskStartsIn, animatedActionBar.refreshRate(), element.ticksToWait() / animatedActionBar.refreshRate(), (iteration) -> {
                     // Cancelling task in case Player connection has been reset OR other dialog has been started in the meanwhile.
                     if (isDialogStillValid(target, dialogIdentifier) == false)
@@ -96,7 +96,7 @@ public final class Dialog implements Collection<DialogElement> {
                 final Message.StringMessage message = (Dialogs.isPlaceholderAPI() == true)
                         ? Message.of(PlaceholderAPI.setPlaceholders(target, messageElement.value()))
                         : Message.of(messageElement.value());
-                // Scheduling a new asynchrnous run task.
+                // Scheduling a new asynchronous run task.
                 plugin.getBedrockScheduler().runAsync(nextTaskStartsIn, (task) -> {
                     // Cancelling task in case Player connection has been reset OR other dialog has been started in the meanwhile.
                     if (isDialogStillValid(target, dialogIdentifier) == false)

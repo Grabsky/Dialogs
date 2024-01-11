@@ -1,39 +1,62 @@
 plugins {
-    id("java-library")
-    id 'net.minecrell.plugin-yml.paper' version '0.6.0'
+    id "java-library"
+    id "net.minecrell.plugin-yml.paper" version "0.6.0"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
-// See "deploy" task registered below as to find out why it's here.
-final buildsDirectory = (System.getenv("JVM_BUILDS") ?: null)
-final pluginsDirectory = (System.getenv("PLUGINS_DIR") ?: null)
+// Environment-specific variables...
+final WORKSPACE_BUILDS = System.getenv("WORKSPACE_BUILDS") ?: null
+final WORKSPACE_PLUGINS = System.getenv("WORKSPACE_PLUGINS") ?: null
 
 group = "cloud.grabsky"
-version = "1.20.1-${System.getenv("GITHUB_RUN_NUMBER") ?: "dev"}"
+version = "1.20.4-${System.getenv("GITHUB_RUN_NUMBER") ?: "DEV"}"
 
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url = "https://repo.grabsky.cloud/releases/" }
+    // Repository for the Paper API.
     maven { url = "https://papermc.io/repo/repository/maven-public/" }
+    // Repository for the PlaceholderAPI, API.
     maven { url = "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
+    // Repository containing the 'bedrock' dependency.
+    maven { url = "https://maven.pkg.github.com/grabsky/bedrock"
+        credentials {
+            username = findProperty("gpr.actor") ?: System.getenv("GITHUB_ACTOR")
+            password = findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+    // Repository containing the 'configuration' dependency.
+    maven { url = "https://maven.pkg.github.com/grabsky/configuration"
+        credentials {
+            username = findProperty("gpr.actor") ?: System.getenv("GITHUB_ACTOR")
+            password = findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+    // Repository containing the 'commands' dependency.
+    maven { url = "https://maven.pkg.github.com/grabsky/commands"
+        credentials {
+            username = findProperty("gpr.actor") ?: System.getenv("GITHUB_ACTOR")
+            password = findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
 }
 
 dependencies {
     // Lombok
-    compileOnly("org.projectlombok:lombok:1.18.26")
-    annotationProcessor("org.projectlombok:lombok:1.18.26")
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
     // Paper API
     compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
-    // Libraries
-    paperLibrary("cloud.grabsky:bedrock:1.20.1-44")
-    paperLibrary("cloud.grabsky:commands:1.20.1-34")
-    paperLibrary("cloud.grabsky:configuration-paper:1.20.1-42")
-    // PlaceholderAPI
+    // Plugin libraries, must be shaded.
+    implementation("cloud.grabsky:bedrock:1.20.1-47")
+    implementation("cloud.grabsky:commands:1.20.1-34")
+    implementation("cloud.grabsky:configuration-paper:1.20.1-42")
+    // Plugin dependencies, should be present in the classpath as required per 'paper-plugin.yml' file.
     compileOnly("me.clip:placeholderapi:2.11.3")
 }
 
 tasks {
-    jar {
+    shadowJar {
         archiveFileName = "${rootProject.name}-${project.version}.jar"
     }
     compileJava {
@@ -44,25 +67,23 @@ tasks {
     }
 }
 
-// Copies produced .jar to $JVM_BUILDS and $PLUGINS_DIR directories specfied as environment variables.
+// Copies produced .jar to $WORKSPACE_BUILDS and $WORKSPACE_PLUGINS directories specified as environment variables.
 // This is solely for debugging/development purposes and does nothing when said variables are not set.
 tasks.register("deploy") {
-    dependsOn(jar)
+    dependsOn(shadowJar)
     doLast {
-        // Copying to the builds directory specified by 'JVM_BUILDS' environment variable.
-        if (buildsDirectory != null)
-            copy { from(jar) into(buildsDirectory) }
-        // Copying to the plugins directory specified by 'PLUGINS_DIR' environment variable.
-        if (pluginsDirectory != null)
-            copy { from(jar) into(pluginsDirectory) }
+        // Copying to the builds directory specified by 'WORKSPACE_BUILDS' environment variable.
+        if (WORKSPACE_BUILDS != null)
+            copy { from(shadowJar) into(WORKSPACE_BUILDS) }
+        // Copying to the plugins directory specified by 'WORKSPACE_PLUGINS' environment variable.
+        if (WORKSPACE_PLUGINS != null)
+            copy { from(shadowJar) into(WORKSPACE_PLUGINS) }
     }
 }
 
 paper {
     main = "cloud.grabsky.dialogs.Dialogs"
-    loader = "cloud.grabsky.dialogs.Dialogs\$PluginLoader"
     apiVersion = "1.20"
-    generateLibrariesJson = true
     serverDependencies {
         "PlaceholderAPI" { load = "BEFORE"; required = false }
     }

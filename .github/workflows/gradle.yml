@@ -1,4 +1,4 @@
-name: Gradle Assemble
+name: Gradle CI + Publish
 
 on:
   push:
@@ -20,10 +20,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       # Building
-      - name: Clean Assemble
+      - name: Build
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: clean assemble
+          arguments: clean shadowJar
         env:
           # GitHub Packages
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -45,6 +45,8 @@
                 "min_letters_per_frame": 1,
                 // Optional maximum number of letters animated per frame. (DEFAULT = 3)
                 "max_letters_per_frame": 1,
+                // Optional typing sound that is played each animation frame. (DEFAULT = block.note_block.hat, master, 1.0, 1.5)
+                "typing_sound": { "key": "block.tripwire.click_on", "source": "master", "volume": 1.0, "pitch": 1.5 },
                 // Optional toggle whether last frame should persist until the next element. (DEFAULT = true)
                 "lock_until_next_element": true,
                 // Ticks to wait before continuing to the next element in the queue. Can be omitted for non-animated elements.

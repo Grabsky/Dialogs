@@ -31,7 +31,6 @@ import cloud.grabsky.configuration.exception.ConfigurationMappingException;
 import cloud.grabsky.configuration.paper.PaperConfigurationMapper;
 import cloud.grabsky.dialogs.command.DialogsCommand;
 import cloud.grabsky.dialogs.configuration.PluginLocale;
-import cloud.grabsky.dialogs.configuration.adapter.DialogElementAdapter;
 import cloud.grabsky.dialogs.loader.DialogsLoader;
 import org.bukkit.event.Listener;
 
@@ -70,7 +69,7 @@ public final class Dialogs extends BedrockPlugin implements Listener {
         // ...
         this.dialogsLoader = new DialogsLoader(this);
         // ...
-        this.mapper = PaperConfigurationMapper.create(moshi -> moshi.add(DialogElement.class, DialogElementAdapter.INSTANCE));
+        this.mapper = PaperConfigurationMapper.create();
         // ...
         if (this.reloadConfiguration() == false)
             this.getServer().shutdown();

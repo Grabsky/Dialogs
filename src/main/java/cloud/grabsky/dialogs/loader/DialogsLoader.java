@@ -1,18 +1,19 @@
 package cloud.grabsky.dialogs.loader;
 
 import cloud.grabsky.configuration.paper.adapter.ComponentAdapter;
+import cloud.grabsky.configuration.paper.adapter.NamespacedKeyAdapter;
+import cloud.grabsky.configuration.paper.adapter.SoundAdapterFactory;
+import cloud.grabsky.configuration.paper.adapter.SoundSourceAdapter;
 import cloud.grabsky.dialogs.Dialog;
-import cloud.grabsky.dialogs.DialogElement;
 import cloud.grabsky.dialogs.Dialogs;
-import cloud.grabsky.dialogs.configuration.adapter.DialogElementAdapter;
+import cloud.grabsky.dialogs.configuration.adapter.DialogElementAdapterFactory;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import okio.BufferedSource;
 import okio.Okio;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnmodifiableView;
+import org.bukkit.NamespacedKey;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +21,10 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -57,8 +62,11 @@ public final class DialogsLoader {
             }
             // Creating a new instance of Moshi.
             final Moshi moshi = new Moshi.Builder()
+                    .add(NamespacedKey.class, NamespacedKeyAdapter.INSTANCE)
+                    .add(Sound.Source.class, SoundSourceAdapter.INSTANCE)
                     .add(Component.class, ComponentAdapter.INSTANCE)
-                    .add(DialogElement.class, DialogElementAdapter.INSTANCE)
+                    .add(DialogElementAdapterFactory.INSTANCE)
+                    .add(SoundAdapterFactory.INSTANCE)
                     .build();
             // Clearing the map before populating it again.
             dialogs.clear();

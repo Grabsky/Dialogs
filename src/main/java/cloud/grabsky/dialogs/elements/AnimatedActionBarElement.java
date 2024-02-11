@@ -25,17 +25,20 @@ package cloud.grabsky.dialogs.elements;
 
 import cloud.grabsky.configuration.util.LazyInit;
 import cloud.grabsky.dialogs.DialogElement;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.jetbrains.annotations.ApiStatus.Internal;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
+
+import org.jetbrains.annotations.ApiStatus.Internal;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -53,6 +56,7 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
             final long refreshRate,
             final int minLettersPerFrame,
             final int maxLettersPerFrame,
+            final Sound typingSound,
             final boolean lockUntilNextElement,
             final int ticksToWait
     ) {
@@ -61,6 +65,7 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
         this.refreshRate = refreshRate;
         this.minLettersPerFrame = minLettersPerFrame;
         this.maxLettersPerFrame = maxLettersPerFrame;
+        this.typingSound = typingSound;
         this.lockUntilNextElement = lockUntilNextElement;
         this.ticksToWait = ticksToWait;
         // ...
@@ -125,6 +130,9 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
     private final int maxLettersPerFrame;
 
     @Getter(AccessLevel.PUBLIC)
+    private final Sound typingSound;
+
+    @Getter(AccessLevel.PUBLIC)
     private final boolean lockUntilNextElement;
 
     @Getter(AccessLevel.PUBLIC)
@@ -153,10 +161,11 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
         // Nullability cannot be determined because it depends entirely on the end-user.
         public @UnknownNullability String value;
 
-        // Following field(s) have defaults and can be omitted or definhed as null by the end-user.
+        // Following field(s) have defaults and can be omitted or defined as null by the end-user.
         public @NotNull Long refresh_rate = 2L;
         public @NotNull Integer min_letters_per_frame = 2;
         public @NotNull Integer max_letters_per_frame = 3;
+        public @NotNull Sound typing_sound = Sound.sound(Key.key("block.note_block.hat"), Sound.Source.MASTER, 1.0f, 1.5f);
         public @NotNull Boolean lock_until_next_element = true;
 
         // Nullability cannot be determined because it depends entirely on the end-user.
@@ -171,7 +180,7 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
             if (ticks_to_wait_before_continuing == null)
                 throw new IllegalStateException("Field \"ticks_to_wait_before_continuing\" is required but is either null or has not been found.");
             // Creating and returning element.
-            return new AnimatedActionBarElement(audience, value, refresh_rate, min_letters_per_frame, max_letters_per_frame, lock_until_next_element, ticks_to_wait_before_continuing);
+            return new AnimatedActionBarElement(audience, value, refresh_rate, min_letters_per_frame, max_letters_per_frame, typing_sound, lock_until_next_element, ticks_to_wait_before_continuing);
         }
 
     }

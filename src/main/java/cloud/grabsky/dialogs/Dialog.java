@@ -32,15 +32,15 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
+
+import org.jetbrains.annotations.NotNull;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -82,8 +82,8 @@ public final class Dialog implements Collection<DialogElement> {
                     // Currently only action bar messages can be "animated".
                     Message.of(component).sendActionBar(target);
                     // Playing the animation sound.
-                    if (frames.hasNext() == true)
-                        target.playSound(target, Sound.BLOCK_NOTE_BLOCK_HAT, 1.0F, 0.1F);
+                    if (frames.hasNext() == true && animatedActionBar.typingSound() != null && animatedActionBar.typingSound().volume() > 0.0f)
+                        target.playSound(animatedActionBar.typingSound());
                     // Continuing... Should be cancelled automatically when max iterations is reached.
                     return true;
                 });

@@ -39,11 +39,12 @@ import cloud.grabsky.dialogs.Dialogs;
 import cloud.grabsky.dialogs.configuration.PluginLocale;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.stream.Stream;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-
-import java.util.stream.Stream;
 
 @Command(name = "dialogs", permission = "dialogs.command.dialogs", usage = "/dialogs (...)")
 public final class DialogsCommand extends RootCommand {

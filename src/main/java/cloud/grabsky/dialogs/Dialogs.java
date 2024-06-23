@@ -71,7 +71,7 @@ public final class Dialogs extends BedrockPlugin implements Listener {
         // ...
         this.mapper = PaperConfigurationMapper.create();
         // ...
-        if (this.reloadConfiguration() == false)
+        if (this.onReload() == false)
             this.getServer().shutdown();
         // ...
         new RootCommandManager(this)
@@ -81,31 +81,21 @@ public final class Dialogs extends BedrockPlugin implements Listener {
         this.getServer().getPluginManager().registerEvents(this, this);
     }
 
-
-    public boolean reloadConfiguration() {
-        try {
-            return this.onReload();
-        } catch (final IllegalStateException | ConfigurationMappingException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     @Override
-    public boolean onReload() throws ConfigurationMappingException, IllegalStateException {
+    public boolean onReload() {
         try {
-            // Reloading configuration...
+            // Ensuring configuration file(s) exist.
             final File locale = ensureResourceExistence(this, new File(this.getDataFolder(), "locale.json"));
-            final File localeCommands = ensureResourceExistence(this, new File(this.getDataFolder(), "locale_commands.json"));
-            // Reloading configuration files.
+            // Mapping configuration file(s).
             mapper.map(
-                    ConfigurationHolder.of(PluginLocale.class, locale),
-                    ConfigurationHolder.of(PluginLocale.Commands.class, localeCommands)
+                    ConfigurationHolder.of(PluginLocale.class, locale)
             );
-            // Returning the result of DialogsLoader#load method as to know whether plugin has reloaded sucessfully or not.
+            // Returning the result of DialogsLoader#load method as to know whether plugin has reloaded successfully or not.
             return this.dialogsLoader.load();
-        } catch (final IOException e) {
-            e.printStackTrace();
+        } catch (final ConfigurationMappingException | IllegalStateException | IOException e) {
+            this.getLogger().severe("An error occurred while trying to reload the plugin.");
+            this.getLogger().severe("  " + e.getMessage());
+            // Returning false, as plugin has failed to reload.
             return false;
         }
     }

@@ -102,13 +102,13 @@ public final class DialogsCommand extends RootCommand {
             // Handling "/dialogs reload" command...
             case "reload" -> {
                 if (sender.hasPermission(this.getPermission() + ".reload") == true) {
-                    final boolean isSuccess = plugin.reloadConfiguration();
+                    final boolean isSuccess = plugin.onReload();
                     // Sending message to the sender.
                     Message.of(isSuccess == true ? PluginLocale.COMMAND_DIALOGS_RELOAD_SUCCESS : PluginLocale.COMMAND_DIALOGS_RELOAD_FAILURE).send(sender);
                     return;
                 }
                 // Sending error message to the sender.
-                Message.of(PluginLocale.Commands.MISSING_PERMISSIONS).send(sender);
+                Message.of(PluginLocale.MISSING_PERMISSIONS).send(sender);
             }
             // Handling "/dialogs send (...)" command...
             case "send" -> {
@@ -127,7 +127,7 @@ public final class DialogsCommand extends RootCommand {
                     return;
                 }
                 // Sending error message to the sender.
-                Message.of(PluginLocale.Commands.MISSING_PERMISSIONS).send(sender);
+                Message.of(PluginLocale.MISSING_PERMISSIONS).send(sender);
             }
             // Showing usage when invalid/unexpected argument has been provided.
             default -> Message.of(PluginLocale.COMMAND_DIALOGS_USAGE).send(sender);

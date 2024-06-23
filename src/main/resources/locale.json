@@ -1,9 +1,10 @@
 {
+    "missing_permissions": "<dark_gray>› <red>Insufficient permissions.",
     "commands": {
         "dialogs_usage": [
             "",
-            "<dark_gray>›  <gold>/dialogs reload",
-            "<dark_gray>›  <gold>/dialogs send <white>(player) (dialog_id)",
+            "<dark_gray>› <gold>/dialogs reload",
+            "<dark_gray>› <gold>/dialogs send <white>(player) (dialog_id)",
             ""
         ],
         // Dialogs > Reload

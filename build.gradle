@@ -4,12 +4,8 @@ plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
-// Environment-specific variables...
-final WORKSPACE_BUILDS = System.getenv("WORKSPACE_BUILDS") ?: null
-final WORKSPACE_PLUGINS = System.getenv("WORKSPACE_PLUGINS") ?: null
-
 group = "cloud.grabsky"
-version = "1.20.6-${System.getenv("GITHUB_RUN_NUMBER") ?: "DEV"}"
+version = "1.21-${System.getenv("GITHUB_RUN_NUMBER") ?: "DEV"}"
 
 repositories {
     mavenLocal()
@@ -19,26 +15,11 @@ repositories {
     // Repository for the PlaceholderAPI, API.
     maven { url = "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
     // Repository containing the 'bedrock' dependency.
-    maven { url = "https://maven.pkg.github.com/grabsky/bedrock"
-        credentials {
-            username = findProperty("gpr.actor") ?: System.getenv("GITHUB_ACTOR")
-            password = findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
+    maven { url = "https://maven.pkg.github.com/grabsky/bedrock"; fillCredentials(it) }
     // Repository containing the 'configuration' dependency.
-    maven { url = "https://maven.pkg.github.com/grabsky/configuration"
-        credentials {
-            username = findProperty("gpr.actor") ?: System.getenv("GITHUB_ACTOR")
-            password = findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
+    maven { url = "https://maven.pkg.github.com/grabsky/configuration"; fillCredentials(it) }
     // Repository containing the 'commands' dependency.
-    maven { url = "https://maven.pkg.github.com/grabsky/commands"
-        credentials {
-            username = findProperty("gpr.actor") ?: System.getenv("GITHUB_ACTOR")
-            password = findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
+    maven { url = "https://maven.pkg.github.com/grabsky/commands"; fillCredentials(it) }
 }
 
 dependencies {
@@ -56,27 +37,12 @@ dependencies {
 }
 
 tasks {
-    shadowJar {
-        archiveFileName = "${rootProject.name}-${project.version}.jar"
-    }
+    shadowJar { archiveFileName = "${rootProject.name}-${project.version}.jar" }
     compileJava {
         options.fork = true
+        // Setting compatibility to Java 17 (above should work too).
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
-// Copies produced .jar to $WORKSPACE_BUILDS and $WORKSPACE_PLUGINS directories specified as environment variables.
-// This is solely for debugging/development purposes and does nothing when said variables are not set.
-tasks.register("deploy") {
-    dependsOn(shadowJar)
-    doLast {
-        // Copying to the builds directory specified by 'WORKSPACE_BUILDS' environment variable.
-        if (WORKSPACE_BUILDS != null)
-            copy { from(shadowJar) into(WORKSPACE_BUILDS) }
-        // Copying to the plugins directory specified by 'WORKSPACE_PLUGINS' environment variable.
-        if (WORKSPACE_PLUGINS != null)
-            copy { from(shadowJar) into(WORKSPACE_PLUGINS) }
     }
 }
 
@@ -85,5 +51,14 @@ paper {
     apiVersion = "1.20"
     serverDependencies {
         "PlaceholderAPI" { load = "BEFORE"; required = false }
+    }
+}
+
+/* UTILITY METHODS */
+
+private final def fillCredentials(final MavenArtifactRepository repository) {
+    repository.credentials {
+        username = findProperty("gpr.actor") ?: System.getenv("GITHUB_ACTOR")
+        password = findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
     }
 }

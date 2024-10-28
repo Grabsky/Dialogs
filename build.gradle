@@ -14,6 +14,8 @@ repositories {
     maven { url = "https://repo.papermc.io/repository/maven-public/" }
     // Repository for the PlaceholderAPI, API.
     maven { url = "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
+    // Repository for the FancyAnalytics API.
+    maven { url = "https://repo.fancyplugins.de/releases" }
     // Repository containing the 'bedrock' dependency.
     maven { url = "https://maven.pkg.github.com/grabsky/bedrock"; fillCredentials(it) }
     // Repository containing the 'configuration' dependency.
@@ -32,6 +34,8 @@ dependencies {
     implementation("cloud.grabsky:bedrock:1.20.1-47")
     implementation("cloud.grabsky:commands:1.20.1-34")
     implementation("cloud.grabsky:configuration-paper:1.20.1-42")
+    // FancyAnalytics
+    implementation("de.oliver.FancyAnalytics:api:0.1.6")
     // Plugin dependencies, should be present in the classpath as required per 'paper-plugin.yml' file.
     compileOnly("me.clip:placeholderapi:2.11.6")
 }

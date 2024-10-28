@@ -1,7 +1,7 @@
 plugins {
     id "java-library"
     id "net.minecrell.plugin-yml.paper" version "0.6.0"
-    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.gradleup.shadow" version "8.3.3"
 }
 
 group = "cloud.grabsky"
@@ -41,8 +41,8 @@ tasks {
     compileJava {
         options.fork = true
         // Setting compatibility to Java 17 (above should work too).
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 

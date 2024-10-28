@@ -17,7 +17,7 @@ Plugin that grants you ability to create complex dialogs *(chains of elements)* 
 <br />
 
 ## Requirements
-Requires **Java 17** (or higher) and **Paper 1.20.1 #161** (or higher).
+Requires **Java 21** (or higher) and **Paper 1.20.1 #161** (or higher).
 
 <br />
 

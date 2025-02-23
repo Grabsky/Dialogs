@@ -23,22 +23,23 @@ public final class Condition {
     private final String value;
 
     public boolean testCondition(final @NotNull Player player) {
-        final String parsed = PlaceholderAPI.setPlaceholders(player, placeholder);
+        final String parsedPlaceholder = PlaceholderAPI.setPlaceholders(player, placeholder);
+        final String parsedValue = PlaceholderAPI.setPlaceholders(player, value);
         return switch (operator) {
-            case EQUALS -> parsed.equals(value);
-            case NOT_EQUALS -> parsed.equals(value) == false;
+            case EQUALS -> parsedPlaceholder.equals(parsedValue);
+            case NOT_EQUALS -> parsedPlaceholder.equals(parsedValue) == false;
             case GREATER_THAN, GREATER_THAN_OR_EQUALS, SMALLER_THAN, SMALLER_THAN_OR_EQUALS -> {
                 // Parsing values to Double.
-                final Double a = toDouble(parsed);
-                final Double b = toDouble(value);
+                final Double a = toDouble(parsedPlaceholder);
+                final Double b = toDouble(parsedValue);
                 // Returning false if first value is not a number.
                 if (a == null) {
-                    Dialogs.getInstance().getLogger().warning("Tried to compare placeholder '" + placeholder + "' but output is not a number: '" + parsed + "'");
+                    Dialogs.getInstance().getLogger().warning("Tried to compare placeholder '" + placeholder + "' but output is not a number: '" + parsedPlaceholder + "'");
                     yield false;
                 }
                 // Returning false if second value is not a number.
                 if (b == null) {
-                    Dialogs.getInstance().getLogger().warning("Tried to compare placeholder '" + placeholder + "' but expected value is not a number: '" + value + "'");
+                    Dialogs.getInstance().getLogger().warning("Tried to compare placeholder '" + placeholder + "' but expected value is not a number: '" + parsedValue + "'");
                     yield false;
                 }
                 // Comparing numbers based on the specified operator and returning the result.
@@ -53,10 +54,10 @@ public final class Condition {
                 // In any other case, false is returned.
                 yield false;
             }
-            case CONTAINS -> parsed.contains(value);
-            case NOT_CONTAINS -> parsed.contains(value) == false;
-            case STARTS_WITH -> parsed.startsWith(value);
-            case ENDS_WITH -> parsed.endsWith(value);
+            case CONTAINS -> parsedPlaceholder.contains(parsedValue);
+            case NOT_CONTAINS -> parsedPlaceholder.contains(parsedValue) == false;
+            case STARTS_WITH -> parsedPlaceholder.startsWith(parsedValue);
+            case ENDS_WITH -> parsedPlaceholder.endsWith(parsedValue);
         };
     }
 

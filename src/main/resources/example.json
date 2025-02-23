@@ -73,5 +73,52 @@
                 "value": "<gold><italic>Stranger<gray> gave <gold>%player_name%<gray> an old, rusty <white>Iron Sword<gray>..."
             }
         ]
+    },
+    // Dialog elements can have be tested against conditions.
+    "conditions_example": {
+        // Elements array.
+        "elements": [
+            {
+                "type": "chat_message",
+                // Text to be displayed. Supports PlaceholderAPI and multiple lines.
+                "value": "Ping: <green>%player_ping%",
+                "conditions": [
+                    { "placeholder": "%player_ping%", "operator": "greater_than_or_equals", "value": "0" },
+                    { "placeholder": "%player_ping%", "operator": "smaller_than", "value": "60" }
+                ]
+            },
+            {
+                "type": "chat_message",
+                // Text to be displayed. Supports PlaceholderAPI and multiple lines.
+                "value": "Ping: <yellow>%player_ping%",
+                // List of conditions to check before executing the action. Can be omitted.
+                // Operators: [equals, not_equals, greater_than, greater_than_or_equals, smaller_than, smaller_than_or_equals, contains, not_contains, starts_with, ends_with]
+                "conditions": [
+                    { "placeholder": "%player_ping%", "operator": "greater_than_or_equals", "value": "60" },
+                    { "placeholder": "%player_ping%", "operator": "smaller_than", "value": "80" }
+                ]
+            },
+            {
+                "type": "chat_message",
+                // Text to be displayed. Supports PlaceholderAPI and multiple lines.
+                "value": "Ping: <gold>%player_ping%",
+                // List of conditions to check before executing the action. Can be omitted.
+                // Operators: [equals, not_equals, greater_than, greater_than_or_equals, smaller_than, smaller_than_or_equals, contains, not_contains, starts_with, ends_with]
+                "conditions": [
+                    { "placeholder": "%player_ping%", "operator": "greater_than_or_equals", "value": "80" },
+                    { "placeholder": "%player_ping%", "operator": "smaller_than", "value": "100" }
+                ]
+            },
+            {
+                "type": "chat_message",
+                // Text to be displayed. Supports PlaceholderAPI and multiple lines.
+                "value": "Ping: <red>%player_ping%",
+                // List of conditions to check before executing the action. Can be omitted.
+                // Operators: [equals, not_equals, greater_than, greater_than_or_equals, smaller_than, smaller_than_or_equals, contains, not_contains, starts_with, ends_with]
+                "conditions": [
+                    { "placeholder": "%player_ping%", "operator": "greater_than_or_equals", "value": "100" }
+                ]
+            }
+        ]
     }
 }

@@ -14,10 +14,12 @@
  */
 package cloud.grabsky.dialogs.loader;
 
+import cloud.grabsky.configuration.adapter.AbstractEnumJsonAdapter;
 import cloud.grabsky.configuration.paper.adapter.ComponentAdapter;
 import cloud.grabsky.configuration.paper.adapter.NamespacedKeyAdapter;
 import cloud.grabsky.configuration.paper.adapter.SoundAdapterFactory;
 import cloud.grabsky.configuration.paper.adapter.SoundSourceAdapter;
+import cloud.grabsky.dialogs.Condition;
 import cloud.grabsky.dialogs.Dialog;
 import cloud.grabsky.dialogs.Dialogs;
 import cloud.grabsky.dialogs.configuration.adapter.DialogElementAdapterFactory;
@@ -81,6 +83,7 @@ public final class DialogsLoader {
                     .add(Component.class, ComponentAdapter.INSTANCE)
                     .add(DialogElementAdapterFactory.INSTANCE)
                     .add(SoundAdapterFactory.INSTANCE)
+                    .add(Condition.Operator.class, new AbstractEnumJsonAdapter<>(Condition.Operator.class, false) {})
                     .build();
             // Clearing the map before populating it again.
             dialogs.clear();

@@ -77,7 +77,6 @@ public final class Dialogs extends BedrockPlugin implements Listener {
         analytics.registerMinecraftPluginMetrics(this);
         // Initializing... This should already be async?
         analytics.initialize();
-
     }
 
     @Override

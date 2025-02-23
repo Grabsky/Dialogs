@@ -57,6 +57,10 @@ public final class Dialog implements Collection<DialogElement> {
         // Iterating over all elements in this Dialog and scheduling to display them.
         for (final DialogElement element : elements) {
 
+            // Skipping execution of the element in case any of the conditions is not met.
+            if (element.conditions().stream().anyMatch(condition -> condition.testCondition(target) == false) == true)
+                continue;
+
             if (element instanceof AnimatedActionBarElement animatedActionBar) {
                 final Iterator<Component> frames = animatedActionBar.frames().iterator();
                 // Scheduling a new asynchronous repeat task.

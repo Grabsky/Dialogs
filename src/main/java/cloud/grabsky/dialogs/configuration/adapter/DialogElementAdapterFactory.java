@@ -15,6 +15,7 @@
 package cloud.grabsky.dialogs.configuration.adapter;
 
 import cloud.grabsky.configuration.paper.adapter.StringComponentAdapter;
+import cloud.grabsky.dialogs.Condition;
 import cloud.grabsky.dialogs.DialogElement;
 import cloud.grabsky.dialogs.elements.AnimatedActionBarElement;
 import cloud.grabsky.dialogs.elements.CommandElement;
@@ -26,11 +27,13 @@ import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.JsonReader.Token;
 import com.squareup.moshi.JsonWriter;
 import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 import net.kyori.adventure.sound.Sound;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
@@ -45,16 +48,19 @@ import static com.squareup.moshi.Types.getRawType;
 public final class DialogElementAdapterFactory implements JsonAdapter.Factory {
     /* SINGLETON */ public static DialogElementAdapterFactory INSTANCE = new DialogElementAdapterFactory();
 
+    private static final Type LIST_OF_CONDITIONS = Types.newParameterizedType(List.class, Condition.class);
+
     @Override
     public @Nullable JsonAdapter<DialogElement> create(final @NotNull Type type, final @NotNull Set<? extends Annotation> annotations, final @NotNull Moshi moshi) {
         if (DialogElement.class.isAssignableFrom(getRawType(type)) == false)
             return null;
         // ...
-        final JsonAdapter<Sound> adapter = moshi.adapter(Sound.class);
+        final var adapter0 = moshi.adapter(Sound.class);
+        final var adapter1 = moshi.adapter(LIST_OF_CONDITIONS);
         // ...
         return new JsonAdapter<>() {
 
-            @Override
+            @Override @SuppressWarnings("unchecked")
             public @NotNull DialogElement fromJson(final @NotNull JsonReader in) throws IOException {
                 // Beginning the JSON object.
                 in.beginObject();
@@ -72,6 +78,12 @@ public final class DialogElementAdapterFactory implements JsonAdapter.Factory {
                                 case "audience" -> init.audience = Enums.fromName(MessageElement.AudienceType.class, in.nextString());
                                 case "value" -> init.value = (in.peek() == Token.BEGIN_ARRAY) ? StringComponentAdapter.INSTANCE.fromJson(in) : in.nextString();
                                 case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
+                                case "conditions" -> {
+                                    // Parsing the Sound object.
+                                    final @Nullable List<Condition> conditions = (List<Condition>) adapter1.nullSafe().fromJson(in);
+                                    // Skipping when specified as null.
+                                    if (conditions != null) init.conditions = conditions;
+                                }
                             }
                         }
                         // Ending the JSON object.
@@ -93,12 +105,18 @@ public final class DialogElementAdapterFactory implements JsonAdapter.Factory {
                                 case "max_letters_per_frame" -> init.max_letters_per_frame = in.nextInt();
                                 case "typing_sound" -> {
                                     // Parsing the Sound object.
-                                    final @Nullable Sound sound = adapter.nullSafe().fromJson(in);
+                                    final @Nullable Sound sound = adapter0.nullSafe().fromJson(in);
                                     // Skipping when specified as null.
                                     if (sound != null) init.typing_sound = sound;
                                 }
                                 case "lock_until_next_element" -> init.lock_until_next_element = in.nextBoolean();
                                 case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
+                                case "conditions" -> {
+                                    // Parsing the Sound object.
+                                    final @Nullable List<Condition> conditions = (List<Condition>) adapter1.nullSafe().fromJson(in);
+                                    // Skipping when specified as null.
+                                    if (conditions != null) init.conditions = conditions;
+                                }
                             }
                         }
                         // Ending the JSON object.
@@ -115,6 +133,12 @@ public final class DialogElementAdapterFactory implements JsonAdapter.Factory {
                             switch (name) {
                                 case "value" -> init.value = in.nextString();
                                 case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
+                                case "conditions" -> {
+                                    // Parsing the Sound object.
+                                    final @Nullable List<Condition> conditions = (List<Condition>) adapter1.nullSafe().fromJson(in);
+                                    // Skipping when specified as null.
+                                    if (conditions != null) init.conditions = conditions;
+                                }
                             }
                         }
                         // Ending the JSON object.
@@ -130,6 +154,12 @@ public final class DialogElementAdapterFactory implements JsonAdapter.Factory {
                             // ...
                             switch (name) {
                                 case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
+                                case "conditions" -> {
+                                    // Parsing the Sound object.
+                                    final @Nullable List<Condition> conditions = (List<Condition>) adapter1.nullSafe().fromJson(in);
+                                    // Skipping when specified as null.
+                                    if (conditions != null) init.conditions = conditions;
+                                }
                             }
                         }
                         // Ending the JSON object.

@@ -15,6 +15,7 @@
 package cloud.grabsky.dialogs.elements;
 
 import cloud.grabsky.configuration.util.LazyInit;
+import cloud.grabsky.dialogs.Condition;
 import cloud.grabsky.dialogs.DialogElement;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -22,6 +23,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -49,7 +51,8 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
             final int maxLettersPerFrame,
             final Sound typingSound,
             final boolean lockUntilNextElement,
-            final int ticksToWait
+            final int ticksToWait,
+            final List<Condition> conditions
     ) {
         this.audience = audience;
         this.value = value;
@@ -59,6 +62,7 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
         this.typingSound = typingSound;
         this.lockUntilNextElement = lockUntilNextElement;
         this.ticksToWait = ticksToWait;
+        this.conditions = conditions;
         // ...
         final ArrayList<Component> frames = new ArrayList<>();
         // ...
@@ -132,6 +136,9 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
     @Getter(AccessLevel.PUBLIC)
     private final int ticksToWait;
 
+    @Getter(AccessLevel.PUBLIC)
+    private final List<Condition> conditions;
+
 
     /**
      * Defines support audience types to forward the {@link AnimatedActionBarElement} to.
@@ -158,6 +165,7 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
         public @NotNull Integer max_letters_per_frame = 3;
         public @NotNull Sound typing_sound = Sound.sound(Key.key("block.note_block.hat"), Sound.Source.MASTER, 1.0f, 1.5f);
         public @NotNull Boolean lock_until_next_element = true;
+        public @NotNull List<Condition> conditions = Collections.emptyList();
 
         // Nullability cannot be determined because it depends entirely on the end-user.
         public @UnknownNullability Integer ticks_to_wait_before_continuing;
@@ -171,7 +179,7 @@ public final class AnimatedActionBarElement implements DialogElement.Animated {
             if (ticks_to_wait_before_continuing == null)
                 throw new IllegalStateException("Field \"ticks_to_wait_before_continuing\" is required but is either null or has not been found.");
             // Creating and returning element.
-            return new AnimatedActionBarElement(audience, value, refresh_rate, min_letters_per_frame, max_letters_per_frame, typing_sound, lock_until_next_element, ticks_to_wait_before_continuing);
+            return new AnimatedActionBarElement(audience, value, refresh_rate, min_letters_per_frame, max_letters_per_frame, typing_sound, lock_until_next_element, ticks_to_wait_before_continuing, conditions);
         }
 
     }

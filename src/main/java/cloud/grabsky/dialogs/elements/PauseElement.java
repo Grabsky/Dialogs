@@ -15,7 +15,11 @@
 package cloud.grabsky.dialogs.elements;
 
 import cloud.grabsky.configuration.util.LazyInit;
+import cloud.grabsky.dialogs.Condition;
 import cloud.grabsky.dialogs.DialogElement;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +37,9 @@ public final class PauseElement implements DialogElement {
     @Getter(AccessLevel.PUBLIC)
     private final int ticksToWait;
 
+    @Getter(AccessLevel.PUBLIC)
+    private final List<Condition> conditions;
+
 
     @Internal
     @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
@@ -42,13 +49,16 @@ public final class PauseElement implements DialogElement {
         // Nullability cannot be determined because it depends entirely on the end-user.
         public @UnknownNullability Integer ticks_to_wait_before_continuing = null;
 
+        // Following field(s) have defaults and can be omitted or defined as null by the end-user.
+        public @NotNull List<Condition> conditions = Collections.emptyList();
+
         @Override
         public @NotNull PauseElement init() throws IllegalStateException {
             // Throwing an error in case "value" field is invalid.
             if (ticks_to_wait_before_continuing == null)
                 throw new IllegalStateException("Field \"ticks_to_wait_before_continuing\" is required but is either null or has not been found.");
             // Creating and returning element.
-            return new PauseElement(ticks_to_wait_before_continuing);
+            return new PauseElement(ticks_to_wait_before_continuing, conditions);
         }
 
     }

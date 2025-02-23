@@ -31,6 +31,8 @@ public interface DialogElement {
      */
     int ticksToWait();
 
+    List<Condition> conditions();
+
     /**
      * Represents dialog element that can be animated.
      */

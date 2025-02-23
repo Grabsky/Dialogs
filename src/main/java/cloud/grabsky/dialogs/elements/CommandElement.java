@@ -15,7 +15,11 @@
 package cloud.grabsky.dialogs.elements;
 
 import cloud.grabsky.configuration.util.LazyInit;
+import cloud.grabsky.dialogs.Condition;
 import cloud.grabsky.dialogs.DialogElement;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.NotNull;
@@ -45,6 +49,9 @@ public class CommandElement implements DialogElement {
     @Getter(AccessLevel.PUBLIC)
     private final int ticksToWait;
 
+    @Getter(AccessLevel.PUBLIC)
+    private final List<Condition> conditions;
+
     /**
      * Defines type (executor) of this command.
      */
@@ -64,7 +71,10 @@ public class CommandElement implements DialogElement {
 
         // Nullability cannot be determined because it depends entirely on the end-user.
         public @UnknownNullability String value;
+
+        // Following field(s) have defaults and can be omitted or defined as null by the end-user.
         public @NotNull Integer ticks_to_wait_before_continuing = 1;
+        public @NotNull List<Condition> conditions = Collections.emptyList();
 
         @Override
         public @NotNull CommandElement init() throws IllegalStateException {
@@ -72,7 +82,7 @@ public class CommandElement implements DialogElement {
             if (value == null)
                 throw new IllegalStateException("Field \"value\" is required but is either null or has not been found.");
             // Creating and returning element.
-            return new CommandElement(type, value, ticks_to_wait_before_continuing);
+            return new CommandElement(type, value, ticks_to_wait_before_continuing, conditions);
         }
 
     }

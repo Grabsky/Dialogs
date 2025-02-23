@@ -15,8 +15,12 @@
 package cloud.grabsky.dialogs.elements;
 
 import cloud.grabsky.configuration.util.LazyInit;
+import cloud.grabsky.dialogs.Condition;
 import cloud.grabsky.dialogs.DialogElement;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.NotNull;
@@ -52,6 +56,9 @@ public final class MessageElement implements DialogElement {
     @Getter(AccessLevel.PUBLIC)
     private final int ticksToWait;
 
+    @Getter(AccessLevel.PUBLIC)
+    private final List<Condition> conditions;
+
 
     /**
      * Defines supported channels to send the {@link MessageElement} in.
@@ -76,14 +83,16 @@ public final class MessageElement implements DialogElement {
         // Not an actual JSON field(s), filled by JsonAdapter based on context.
         private final @NotNull MessageElement.Type type;
 
-        // Following field(s) have defaults and can be omitted or definhed as null by the end-user.
+        // Following field(s) have defaults and can be omitted or defined as null by the end-user.
         public @NotNull AudienceType audience = AudienceType.PLAYER;
 
         // Nullability cannot be determined because it depends entirely on the end-user.
         public @UnknownNullability String value;
 
-        // Following field(s) have defaults and can be omitted or definhed as null by the end-user.
+        // Following field(s) have defaults and can be omitted or defined as null by the end-user.
         public @NotNull Integer ticks_to_wait_before_continuing = 1;
+        public @NotNull List<Condition> conditions = Collections.emptyList();
+
 
         @Override
         public @NotNull MessageElement init() throws IllegalStateException {
@@ -91,7 +100,7 @@ public final class MessageElement implements DialogElement {
             if (value == null)
                 throw new IllegalStateException("Field \"value\" is required but is either null or has not been found.");
             // Creating and returning element.
-            return new MessageElement(type, audience, value, ticks_to_wait_before_continuing);
+            return new MessageElement(type, audience, value, ticks_to_wait_before_continuing, conditions);
         }
 
     }

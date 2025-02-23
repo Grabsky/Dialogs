@@ -32,6 +32,12 @@ Dialogs allows you to do the following:
   - `player_command` - Makes target player execute a command.
   - `pause` - Waits for desired amount of ticks, before proceeding to the next action.
   - ...more to come in the future!
+- Test placeholder-based conditions before executing an action.
+  - `equals` and `not_equals` - Checks if two strings are equal.
+  - `contains` and `not_contains` - Checks if one string contains another.
+  - `starts_with` and `ends_with` - Checks if one string starts or ends with another.
+  - `greater_than`, `greater_than_or_equals` - Checks if one number is greater than another.
+  - `smaller_than` and `smaller_than_or_equals` - Checks if one number is smaller than another.
 
 Every element type except for `actionbar_animation` have built-in support for **[PlaceholderAPI](https://github.com/PlaceholderAPI/PlaceholderAPI)**.
 

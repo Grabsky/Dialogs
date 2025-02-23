@@ -31,6 +31,9 @@ public interface DialogElement {
      */
     int ticksToWait();
 
+    /**
+     * List of all conditions that must be met in order to execute this {@link DialogElement}.
+     */
     List<Condition> conditions();
 
     /**

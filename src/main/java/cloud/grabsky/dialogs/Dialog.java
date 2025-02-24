@@ -19,6 +19,7 @@ import cloud.grabsky.dialogs.elements.AnimatedActionBarElement;
 import cloud.grabsky.dialogs.elements.CommandElement;
 import cloud.grabsky.dialogs.elements.MessageElement;
 import cloud.grabsky.dialogs.elements.PauseElement;
+import cloud.grabsky.dialogs.elements.SoundElement;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -29,6 +30,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
@@ -122,12 +124,29 @@ public final class Dialog implements Collection<DialogElement> {
                     // Cancelling task in case Player connection has been reset OR other dialog has been started in the meanwhile.
                     if (isDialogStillValid(target, dialogIdentifier) == false)
                         return;
-                    // Preparing command string.
-                    final String command = (Dialogs.isPlaceholderAPI() == true) ? PlaceholderAPI.setPlaceholders(target, commandElement.value()) : commandElement.value();
+                    // Setting placeholders in commands.
+                    final List<String> commands = (Dialogs.isPlaceholderAPI() == true)
+                            ? commandElement.value().stream().map(command -> PlaceholderAPI.setPlaceholders(target, command)).toList()
+                            : commandElement.value();
                     // Getting the command sender.
                     final CommandSender sender = (commandElement.type() == CommandElement.Type.PLAYER_COMMAND) ? target : plugin.getServer().getConsoleSender();
-                    // Dispatching the command.
-                    plugin.getServer().dispatchCommand(sender, command);
+                    // Dispatching commands.
+                    commands.forEach(command -> plugin.getServer().dispatchCommand(sender, command));
+                });
+                // Calculating "start" time of the next element.
+                nextTaskStartsIn += element.ticksToWait();
+            }
+
+            else if (element instanceof SoundElement soundElement) {
+                // Scheduling a new run task. Command dispatch have to be called on the main thread.
+                plugin.getBedrockScheduler().run(nextTaskStartsIn, (task) -> {
+                    // Cancelling task in case Player connection has been reset OR other dialog has been started in the meanwhile.
+                    if (isDialogStillValid(target, dialogIdentifier) == false)
+                        return;
+                    // Getting the audience.
+                    final Audience audience = (soundElement.audience() == SoundElement.AudienceType.PLAYER) ? target : plugin.getServer();
+                    // Playing sounds.
+                    soundElement.value().forEach(audience::playSound);
                 });
                 // Calculating "start" time of the next element.
                 nextTaskStartsIn += element.ticksToWait();

@@ -21,6 +21,7 @@ import cloud.grabsky.dialogs.elements.AnimatedActionBarElement;
 import cloud.grabsky.dialogs.elements.CommandElement;
 import cloud.grabsky.dialogs.elements.MessageElement;
 import cloud.grabsky.dialogs.elements.PauseElement;
+import cloud.grabsky.dialogs.elements.SoundElement;
 import cloud.grabsky.dialogs.util.Enums;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonReader;
@@ -33,6 +34,7 @@ import net.kyori.adventure.sound.Sound;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -49,6 +51,8 @@ public final class DialogElementAdapterFactory implements JsonAdapter.Factory {
     /* SINGLETON */ public static DialogElementAdapterFactory INSTANCE = new DialogElementAdapterFactory();
 
     private static final Type LIST_OF_CONDITIONS = Types.newParameterizedType(List.class, Condition.class);
+    private static final Type LIST_OF_STRINGS = Types.newParameterizedType(List.class, String.class);
+    private static final Type LIST_OF_SOUNDS = Types.newParameterizedType(List.class, Sound.class);
 
     @Override
     public @Nullable JsonAdapter<DialogElement> create(final @NotNull Type type, final @NotNull Set<? extends Annotation> annotations, final @NotNull Moshi moshi) {
@@ -57,6 +61,8 @@ public final class DialogElementAdapterFactory implements JsonAdapter.Factory {
         // ...
         final var adapter0 = moshi.adapter(Sound.class);
         final var adapter1 = moshi.adapter(LIST_OF_CONDITIONS);
+        final var adapter2 = moshi.adapter(LIST_OF_STRINGS);
+        final var adapter3 = moshi.adapter(LIST_OF_SOUNDS);
         // ...
         return new JsonAdapter<>() {
 
@@ -131,7 +137,42 @@ public final class DialogElementAdapterFactory implements JsonAdapter.Factory {
                             final String name = in.nextName().toLowerCase();
                             // ...
                             switch (name) {
-                                case "value" -> init.value = in.nextString();
+                                case "value" -> {
+                                    if (in.peek() == Token.BEGIN_ARRAY) {
+                                        init.value = (List<String>) adapter2.nullSafe().fromJson(in);
+                                        continue;
+                                    }
+                                    init.value = List.of(in.nextString());
+                                }
+                                case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
+                                case "conditions" -> {
+                                    // Parsing the Sound object.
+                                    final @Nullable List<Condition> conditions = (List<Condition>) adapter1.nullSafe().fromJson(in);
+                                    // Skipping when specified as null.
+                                    if (conditions != null) init.conditions = conditions;
+                                }
+                            }
+                        }
+                        // Ending the JSON object.
+                        in.endObject();
+                        // Initializing and returning the value.
+                        yield init.init();
+                    }
+                    case "sound" -> {
+                        final SoundElement.Init init = new SoundElement.Init();
+                        // ...
+                        while (in.hasNext() == true) {
+                            final String name = in.nextName().toLowerCase();
+                            // ...
+                            switch (name) {
+                                case "audience" -> init.audience = Enums.fromName(SoundElement.AudienceType.class, in.nextString());
+                                case "value" -> {
+                                    if (in.peek() == Token.BEGIN_ARRAY) {
+                                        init.value = (List<Sound>) adapter3.nullSafe().fromJson(in);
+                                        continue;
+                                    }
+                                    init.value = Collections.singletonList(adapter0.nullSafe().fromJson(in));
+                                }
                                 case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
                                 case "conditions" -> {
                                     // Parsing the Sound object.

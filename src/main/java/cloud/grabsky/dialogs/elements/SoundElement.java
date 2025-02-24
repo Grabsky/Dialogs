@@ -17,6 +17,7 @@ package cloud.grabsky.dialogs.elements;
 import cloud.grabsky.configuration.util.LazyInit;
 import cloud.grabsky.dialogs.Condition;
 import cloud.grabsky.dialogs.DialogElement;
+import net.kyori.adventure.sound.Sound;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,19 +33,19 @@ import lombok.experimental.Accessors;
 
 @Accessors(fluent = true)
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
-public class CommandElement implements DialogElement {
+public final class SoundElement implements DialogElement {
 
     /**
-     * Type to use when forwarding this instance of {@link CommandElement}.
+     * Audience to forward this message to.
      */
     @Getter(AccessLevel.PUBLIC)
-    private final CommandElement.Type type;
+    private final transient AudienceType audience;
 
     /**
-     * List of commands to be executed.
+     * List of sounds to be played.
      */
     @Getter(AccessLevel.PUBLIC)
-    private final List<String> value;
+    private final List<Sound> value;
 
     @Getter(AccessLevel.PUBLIC)
     private final int ticksToWait;
@@ -52,37 +53,38 @@ public class CommandElement implements DialogElement {
     @Getter(AccessLevel.PUBLIC)
     private final List<Condition> conditions;
 
+
     /**
-     * Defines type (executor) of this command.
+     * Defines support audience types to forward the {@link SoundElement} to.
      */
-    // NOTE: Split into two separate types as to not introduce required property that defines command executor. Optional property with default value does not make much sense in that case.
-    public enum Type {
-        PLAYER_COMMAND, CONSOLE_COMMAND;
+    public enum AudienceType {
+        PLAYER, SERVER;
     }
 
 
     @Internal
     @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
     // NOTE: Field names does not follow Java Naming Convention to provide 1:1 mapping with JSON keys.
-    public static final class Init implements LazyInit<CommandElement> {
+    public static final class Init implements LazyInit<SoundElement> {
 
-        // Not an actual JSON field, filled by JsonAdapter based on context.
-        private final @NotNull CommandElement.Type type;
+        // Following field(s) have defaults and can be omitted or defined as null by the end-user.
+        public @NotNull AudienceType audience = AudienceType.PLAYER;
 
         // Nullability cannot be determined because it depends entirely on the end-user.
-        public @UnknownNullability List<String> value;
+        public @UnknownNullability List<Sound> value;
 
         // Following field(s) have defaults and can be omitted or defined as null by the end-user.
         public @NotNull Integer ticks_to_wait_before_continuing = 1;
         public @NotNull List<Condition> conditions = Collections.emptyList();
 
+
         @Override
-        public @NotNull CommandElement init() throws IllegalStateException {
+        public @NotNull SoundElement init() throws IllegalStateException {
             // Throwing an error in case "value" field is invalid.
             if (value == null)
                 throw new IllegalStateException("Field \"value\" is required but is either null or has not been found.");
             // Creating and returning element.
-            return new CommandElement(type, value, ticks_to_wait_before_continuing, conditions);
+            return new SoundElement(audience, value, ticks_to_wait_before_continuing, conditions);
         }
 
     }

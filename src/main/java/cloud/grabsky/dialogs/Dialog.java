@@ -60,8 +60,12 @@ public final class Dialog implements Collection<DialogElement> {
         for (final DialogElement element : elements) {
 
             // Skipping execution of the element in case any of the conditions is not met.
-            if (element.conditions().stream().anyMatch(condition -> condition.testCondition(target) == false) == true)
+            if (element.conditions().isEmpty() == false && element.conditions().stream().anyMatch(condition -> condition.testCondition(target) == false) == true) {
+                // Calculating "start" time of the next element. Additionally, refresh rate value is added as to prevent elements from overlapping.
+                nextTaskStartsIn += element.ticksToWait();
+                // Continuing...
                 continue;
+            }
 
             if (element instanceof AnimatedActionBarElement animatedActionBar) {
                 final Iterator<Component> frames = animatedActionBar.frames().iterator();

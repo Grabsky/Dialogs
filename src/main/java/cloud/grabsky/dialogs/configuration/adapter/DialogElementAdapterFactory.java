@@ -140,9 +140,9 @@ public final class DialogElementAdapterFactory implements JsonAdapter.Factory {
                                 case "value" -> {
                                     if (in.peek() == Token.BEGIN_ARRAY) {
                                         init.value = (List<String>) adapter2.nullSafe().fromJson(in);
-                                        continue;
+                                    } else {
+                                        init.value = List.of(in.nextString());
                                     }
-                                    init.value = List.of(in.nextString());
                                 }
                                 case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
                                 case "conditions" -> {
@@ -169,9 +169,9 @@ public final class DialogElementAdapterFactory implements JsonAdapter.Factory {
                                 case "value" -> {
                                     if (in.peek() == Token.BEGIN_ARRAY) {
                                         init.value = (List<Sound>) adapter3.nullSafe().fromJson(in);
-                                        continue;
+                                    } else {
+                                        init.value = Collections.singletonList(adapter0.nullSafe().fromJson(in));
                                     }
-                                    init.value = Collections.singletonList(adapter0.nullSafe().fromJson(in));
                                 }
                                 case "ticks_to_wait_before_continuing" -> init.ticks_to_wait_before_continuing = in.nextInt();
                                 case "conditions" -> {
